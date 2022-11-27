@@ -22,24 +22,19 @@ class GuiDlgConfig
  public:
 
   void	open(HWND parent);
+  static BOOL APIENTRY	DlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
  private:
 
-  static BOOL APIENTRY	DlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
-  static BOOL APIENTRY	TabDlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+  static BOOL APIENTRY	OutputTabDlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
+  static BOOL APIENTRY	FormatsTabDlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
   BOOL APIENTRY	DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
   BOOL APIENTRY	OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
-  BOOL APIENTRY	PlaybackTabDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
   BOOL APIENTRY	FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-  void syncControlStates(HWND hwndDlg);
-
-  HWND			tab_hwnd;
-  int			tab_index;
+  void syncControlStates(HWND hwndDlg) const;
 
   t_config_data		next;
-
   bool			cancelled;
-  string		tmpxdiskdir;
 };

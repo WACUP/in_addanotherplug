@@ -22,154 +22,149 @@
  */
 
 #include "resource.h"
-/////////////////////////////////////////////////////////////////////////////
-// English (Australia) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United Kingdom) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 #pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 2,3,4,2
+ PRODUCTVERSION 2,3,4,2
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080004b0"
+        BEGIN
+            VALUE "CompanyName", "WACUP"
+            VALUE "FileDescription", "Input Plug-in"
+            VALUE "FileVersion", "2.3.4.2"
+            VALUE "InternalName", "in_addanotherplug.dll"
+            VALUE "LegalCopyright", "Copyright © 1999-2022 Simon Peter, et al (https://adplug.github.io), WACUP related modifications by Darren Owen aka DrO (© 2022)"
+            VALUE "OriginalFilename", "in_addanotherplug.dll"
+            VALUE "ProductName", "AdPlug (AdLib) Player"
+            VALUE "ProductVersion", "2.3.4.2"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x800, 1200
+    END
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_ABOUT DIALOG 0, 0, 293, 175
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "AdPlug :: About"
-FONT 8, "MS Sans Serif"
+IDD_CFG_FORMATS DIALOGEX 0, 0, 264, 326
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    CONTROL         "TabControl1",IDC_ATABS,"SysTabControl32",TCS_BUTTONS | TCS_FOCUSONBUTTONDOWN | WS_TABSTOP,7,8,173,13
-    CONTROL         "",IDC_ATABWND,"Static",SS_SIMPLE,5,14,284,160
+    LISTBOX         IDC_FORMATLIST,4,3,255,304,LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "&Select all",IDC_FTSELALL,6,312,101,14,BS_MULTILINE
+    PUSHBUTTON      "&Deselect all",IDC_FTDESELALL,128,312,101,14,BS_MULTILINE
 END
 
-IDD_CFG_FORMATS DIALOGEX 0, 0, 326, 223
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif", 0, 0, 0x0
+IDD_CFG_OUTPUT DIALOGEX 0, 0, 264, 324
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LISTBOX         IDC_FORMATLIST,6,6,312,180,LBS_MULTIPLESEL | WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "&Select all",IDC_FTSELALL,6,202,101,14,BS_MULTILINE
-    PUSHBUTTON      "&Deselect all",IDC_FTDESELALL,216,202,101,14,BS_MULTILINE
-    CONTROL         "S3M File work-around for Nullsoft Module Decoder Plugin",IDC_FTWORKAROUND,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,6,188,194,10
-END
-
-IDD_CFG_OUTPUT DIALOGEX 0, 0, 326, 223
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    GROUPBOX        "Emulator",IDC_STATIC,6,6,144,60,BS_LEFT
-    COMBOBOX        IDC_COMBO1,10,19,135,12,CBS_DROPDOWNLIST | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "",IDC_EMUINFO,10,36,135,26
-    GROUPBOX        "",IDC_STATIC,156,6,162,60,BS_LEFT
+    GROUPBOX        "Emulator",IDC_STATIC,4,0,259,51,BS_LEFT
+    COMBOBOX        IDC_COMBO1,10,13,249,12,CBS_DROPDOWNLIST | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",IDC_EMUINFO,10,29,246,17
+    GROUPBOX        "",IDC_STATIC,4,55,259,51,BS_LEFT
     CONTROL         "Use a different emulator for the right-channel",IDC_ALTSYNTH,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,161,6,153,10
-    COMBOBOX        IDC_COMBO2,168,19,135,12,CBS_DROPDOWNLIST | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Normally this will be the same as the left channel, but you can change it to compare two different emulators at the same time.",IDC_STATIC,168,36,138,26
-    GROUPBOX        "Frequency ",IDC_STATIC,156,72,60,91,BS_LEFT
-    CONTROL         "1&1025",IDC_FREQ1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,168,84,34,10
-    CONTROL         "2&2050",IDC_FREQ2,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,168,96,34,10
-    CONTROL         "4&4100",IDC_FREQ3,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,168,108,34,10
-    CONTROL         "4&8000",IDC_FREQ4,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,168,120,34,10
-    CONTROL         "4&9716",IDC_FREQ5,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,168,132,36,10
-    CONTROL         "",IDC_FREQC,"Button",BS_AUTORADIOBUTTON,168,146,11,8
-    EDITTEXT        IDC_FREQC_VALUE,179,144,29,12,ES_UPPERCASE | ES_NUMBER
-    GROUPBOX        "Resolution ",IDC_STATIC,222,128,54,35,BS_LEFT
-    CONTROL         "8-&Bits",IDC_QUALITY8,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,228,138,32,10
-    CONTROL         "16-B&its",IDC_QUALITY16,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,228,150,35,10
-    GROUPBOX        "Channels ",IDC_STATIC,222,72,54,50,BS_LEFT
-    CONTROL         "&Mono",IDC_MONO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,228,84,32,10
-    CONTROL         "&Stereo",IDC_STEREO,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,228,96,35,10
-    CONTROL         "S&urround",IDC_SURROUND,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,228,108,42,10
-    GROUPBOX        "Frequency ",IDC_STATIC,156,72,60,91,BS_LEFT
-    GROUPBOX        "",IDC_STATIC,6,72,144,54,BS_LEFT
-    CONTROL         "Enable Disk Writer (RAW Format)",IDC_OUTDISK,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,72,120,10
-    LTEXT           "This will save the OPL data of each song played as a file in RDOS .raw format.",IDC_STATIC,10,84,135,26
-    PUSHBUTTON      "C:\\",IDC_DIRECTORY,15,104,125,15
-END
-
-IDD_CFG_PLAYBACK DIALOGEX 0, 0, 326, 223
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    CONTROL         "&Auto-detect Song End",IDC_TESTLOOP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,24,84,10
-    CONTROL         "&Play subsongs sequentially",IDC_SUBSEQ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,140,24,100,10
-    CONTROL         "Slider1",IDC_PRIORITY,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,11,185,301,11
-    LTEXT           "Idle",IDC_STATIC,11,199,12,8
-    LTEXT           "Normal",IDC_STATIC,150,198,23,8
-    RTEXT           "Real-time",IDC_STATIC,276,198,30,8
-    GROUPBOX        "Thread Priority",IDC_STATIC,6,174,312,39
-    CONTROL         "&Standard Refresh Rate",IDC_STDTIMER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,68,87,10
-    PUSHBUTTON      "adplug.db",IDC_DATABASE,12,150,300,15
-    CONTROL         "&Use Database",IDC_USEDB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,132,61,10
-    GROUPBOX        "Database",IDC_STATIC,6,90,312,81
-    LTEXT           "Some formats can be played back at different speeds, but the files themselves do not indicate the correct speed to use.  The AdPlug database is used to look up the correct playback speeds for known files in these formats.",IDC_STATIC,18,102,294,26
-    GROUPBOX        "Disk Writer",IDC_STATIC,6,54,312,33
-    GROUPBOX        "Options",IDC_STATIC,6,6,312,42
-END
-
-IDD_ABT_ADPLUG DIALOG 0, 0, 279, 141
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif"
-BEGIN
-    CONTROL         IDB_LOGO,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE | SS_REALSIZEIMAGE,5,49,267,71
-    CTEXT           "",IDC_PLUGIN_VER,6,0,266,8,NOT WS_GROUP
-    LTEXT           "url_sp",IDC_URL_SP,173,14,50,8,NOT WS_GROUP
-    RTEXT           "Copyright © 1999 - 2010 Simon Peter <",IDC_STATIC,47,14,126,8,NOT WS_GROUP
-    LTEXT           ">",IDC_STATIC,224,14,8,8,NOT WS_GROUP
-    LTEXT           "url_nk",IDC_URL_NK,179,23,39,8,NOT WS_GROUP
-    RTEXT           "Copyright © 2002 Nikita V. Kalaganov <",IDC_STATIC,49,23,129,8,NOT WS_GROUP
-    LTEXT           ">",IDC_STATIC,219,23,8,8,NOT WS_GROUP
-    LTEXT           "url_wv",IDC_URL_WV,151,31,74,8,NOT WS_GROUP
-    RTEXT           "Copyright © 2010 Wraithverge <",IDC_STATIC,47,31,103,8,NOT WS_GROUP
-    LTEXT           ">",IDC_STATIC,226,31,8,8,NOT WS_GROUP
-    LTEXT           "url_bm",IDC_URL_BM,155,40,74,8,NOT WS_GROUP
-    RTEXT           "Copyright © 2016-2017 Stas'M <",IDC_STATIC,51,40,103,8,NOT WS_GROUP
-    LTEXT           ">",IDC_STATIC,222,40,8,8,NOT WS_GROUP
-    RTEXT           "[ Get the latest version at ",IDC_STATIC,55,119,82,8,NOT WS_GROUP
-    LTEXT           " ]",IDC_STATIC,211,119,8,8,NOT WS_GROUP
-    CTEXT           "url_adplug",IDC_URL_ADPLUG,138,119,75,8,NOT WS_GROUP
-    RTEXT           "[ Get music at ",IDC_STATIC,7,130,45,8,NOT WS_GROUP
-    LTEXT           " ]",IDC_STATIC,133,130,8,8,NOT WS_GROUP
-    CTEXT           "url_chiptune",IDC_URL_CHIPTUNE,53,130,81,8,NOT WS_GROUP
-    RTEXT           "[ Get soft at ",IDC_STATIC,147,130,40,8,NOT WS_GROUP
-    LTEXT           " ]",IDC_STATIC,265,130,8,8,NOT WS_GROUP
-    CTEXT           "url_malf",IDC_URL_MALF,188,130,80,8,NOT WS_GROUP
-END
-
-IDD_ABT_LICENSE DIALOGEX 0, 0, 279, 141
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif", 0, 0, 0x1
-BEGIN
-    EDITTEXT        IDC_LICENSE,0,0,279,124,ES_MULTILINE | ES_READONLY | NOT WS_BORDER | WS_VSCROLL | NOT WS_TABSTOP,WS_EX_CLIENTEDGE
-    LTEXT           "Read GNU LGPL: ",IDC_STATIC,0,132,60,8,NOT WS_GROUP
-    LTEXT           "url_gnu",IDC_URL_GNU,61,132,95,8,NOT WS_GROUP
-END
-
-IDD_ABT_HISTORY DIALOGEX 0, 0, 279, 141
-STYLE DS_SETFONT | WS_CHILD | WS_VISIBLE
-FONT 8, "MS Sans Serif", 0, 0, 0x1
-BEGIN
-    EDITTEXT        IDC_HISTORY,0,0,279,140,ES_MULTILINE | ES_READONLY | NOT WS_BORDER | WS_VSCROLL | NOT WS_TABSTOP,WS_EX_CLIENTEDGE
-END
-
-IDD_CONFIG DIALOGEX 0, 0, 343, 271
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "AdPlug :: Configuration"
-FONT 8, "MS Sans Serif", 0, 0, 0x0
-BEGIN
-    PUSHBUTTON      "&Cancel",IDCANCEL,253,248,81,14,BS_MULTILINE
-    PUSHBUTTON      "&OK",IDOK,166,248,81,14,BS_MULTILINE
-    CONTROL         "Tab1",IDC_CTABS,"SysTabControl32",0x0,5,5,330,238
-    CONTROL         "Tool-Tips",IDC_TOOLTIPS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,251,44,8
-END
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,55,169,10
+    COMBOBOX        IDC_COMBO2,10,69,249,12,CBS_DROPDOWNLIST | CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Normally this will be the same as the left channel, but you can change it to compare two different emulators at the same time.",IDC_STATIC,10,84,246,17
+    GROUPBOX        "Frequency ",IDC_STATIC,4,110,107,57,BS_LEFT
+    CONTROL         "1&1025",IDC_FREQ1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,10,122,36,10
+    CONTROL         "2&2050",IDC_FREQ2,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,10,136,36,10
+    CONTROL         "4&4100",IDC_FREQ3,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,10,150,36,10
+    CONTROL         "4&8000",IDC_FREQ4,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,55,122,36,10
+    CONTROL         "4&9716",IDC_FREQ5,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,55,136,36,10
+    CONTROL         "",IDC_FREQC,"Button",BS_AUTORADIOBUTTON,55,150,11,8
+    EDITTEXT        IDC_FREQC_VALUE,65,148,29,12,ES_UPPERCASE | ES_NUMBER
+    GROUPBOX        "Channels ",IDC_STATIC,117,110,69,57,BS_LEFT
+    CONTROL         "&Mono",IDC_MONO,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,124,122,48,10
+    CONTROL         "&Stereo",IDC_STEREO,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,124,136,48,10
+    CONTROL         "S&urround",IDC_SURROUND,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,124,150,48,10
+    GROUPBOX        "Resolution ",IDC_STATIC,192,110,71,57,BS_LEFT
+    CONTROL         "8-&Bit",IDC_QUALITY8,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,199,122,38,10
+    CONTROL         "16-B&it",IDC_QUALITY16,"Button",BS_AUTORADIOBUTTON | WS_TABSTOP,199,136,38,10
+    GROUPBOX        "",IDC_STATIC,4,172,259,45,BS_LEFT
+    CONTROL         "Enable Disk Writer (RAW Format)",IDC_OUTDISK,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,172,128,10
+    LTEXT           "This saves the OPL data of each song played in a RDOS .raw format file.",IDC_STATIC,11,184,246,10
+    PUSHBUTTON      "",IDC_DIRECTORY,10,196,249,15
+    GROUPBOX        "Options",IDC_STATIC,4,221,259,40
+    CONTROL         "&Auto-detect song end",IDC_TESTLOOP,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,233,88,10
+    CONTROL         "Disk writer &standard refresh rate",IDC_STDTIMER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,246,125,10
+    CONTROL         "&Play subsongs sequentially",IDC_SUBSEQ,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,138,233,104,10
+    GROUPBOX        "",IDC_STATIC,4,265,259,59
+    CONTROL         "&Use Database",IDC_USEDB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,264,62,10
+    LTEXT           "Some formats can be played at different speeds but the files don't report the correct speed to use. The database is used to look up the correct playback speeds for known files.",IDC_STATIC,10,276,246,26
+    PUSHBUTTON      "",IDC_DATABASE,10,304,249,15
+    END
 
 IDD_FILEINFO DIALOGEX 0, 0, 310, 260
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "AdPlug :: File Info"
-FONT 8, "MS Sans Serif", 0, 0, 0x1
-BEGIN
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+    BEGIN
     RTEXT           "Title:",IDC_STATIC,11,7,27,12,SS_CENTERIMAGE
     RTEXT           "Author:",IDC_STATIC,11,21,27,12,SS_CENTERIMAGE
     LTEXT           " Static",IDC_TITLE,41,7,262,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
@@ -200,113 +195,7 @@ BEGIN
     LTEXT           "00",IDC_SUBSONGMIN,15,224,14,9
     RTEXT           "00",IDC_SUBSONGMAX,282,224,14,9
     CTEXT           "00",IDC_SUBSONG,144,221,22,12,SS_CENTERIMAGE,WS_EX_STATICEDGE
-END
-
-  /*** AdPlug's short LGPL license ***/
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXT
-//
-
-IDR_TEXT_LICENSE TEXT 
-BEGIN
-"GNU LGPL license:\r\n"
-"\r\n"
-"This plugin is free software; you can redistribute it and/or modify it\r\n"
-"under the terms of the GNU Lesser General Public License, as published by\r\n"
-"the Free Software Foundation; either version 2.1 of the License, or (at\r\n"
-"your option) any later version.\r\n"
-"\r\n"
-"This plugin is distributed in the hope that it will be useful, but WITHOUT\r\n"
-"ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or\r\n"
-"FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public\r\n"
-"License for more details.\r\n"
-"\r\n"
-"You should have received a copy of the GNU Lesser General Public License\r\n"
-"along with this plugin; if not, write to the Free Software Foundation,\r\n"
-"Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA\0"
-END
-
-IDR_TEXT_HISTORY        TEXT                    "../NEWS"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
-IDB_LOGO                BITMAP                  "adplug.bmp"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Cursor
-//
-
-IDC_HAND2               CURSOR                  "hand.cur"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-1 VERSIONINFO
- FILEVERSION 1,9,0,0
- PRODUCTVERSION 2,3,0,0
- FILEFLAGSMASK 0x0L
-#ifdef _DEBUG
- FILEFLAGS 0x1L
-#else
- FILEFLAGS 0x0L
-#endif
- FILEOS 0x4L
- FILETYPE 0x2L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "040904E4"
-        BEGIN
-            VALUE "CompanyName", "http://adplug.github.io"
-            VALUE "FileDescription", "AdPlug Winamp plugin"
-            VALUE "FileVersion", PLUGIN_VERSION
-            VALUE "InternalName", "in_adlib"
-            VALUE "LegalCopyright", "© 1999-2016 Simon Peter, et al."
-            VALUE "LegalTrademarks", "GNU Lesser General Public License"
-            VALUE "OriginalFilename", "in_adlib.dll"
-            VALUE "ProductName", "AdPlug"
-            VALUE "ProductVersion", ADPLUG_VERSION
-        END
     END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x409, 1252
-    END
-END
-
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE 
-BEGIN
-    "\0"
-END
-
-3 TEXTINCLUDE 
-BEGIN
-    "\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -319,51 +208,23 @@ GUIDELINES DESIGNINFO
 BEGIN
     IDD_CFG_FORMATS, DIALOG
     BEGIN
-    END
+        BOTTOMMARGIN, 251
+END
 
     IDD_CFG_OUTPUT, DIALOG
-    BEGIN
-    END
+BEGIN
+        RIGHTMARGIN, 226
+        BOTTOMMARGIN, 298
+END
 
-    IDD_CFG_PLAYBACK, DIALOG
-    BEGIN
-    END
-
-    IDD_CONFIG, DIALOG
-    BEGIN
-        RIGHTMARGIN, 342
-        BOTTOMMARGIN, 270
-    END
+    IDD_FILEINFO, DIALOG
+BEGIN
+END
 END
 #endif    // APSTUDIO_INVOKED
 
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_CFG_OUTPUT AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_CONFIG AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_CFG_PLAYBACK AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-IDD_CFG_FORMATS AFX_DIALOG_LAYOUT
-BEGIN
-    0
-END
-
-#endif    // English (Australia) resources
+#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

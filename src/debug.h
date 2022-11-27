@@ -18,11 +18,10 @@ extern "C" {
 
   static void debug_init(void)
   {
-    int hCrt;
-    FILE *hf;
-
     // Open console window if no console connected yet
     if(fileno(stdout) == -1) {
+    int hCrt;
+    FILE *hf;
       AllocConsole();
       hCrt = _open_osfhandle((long) GetStdHandle(STD_OUTPUT_HANDLE),_O_TEXT);
       hf = _fdopen( hCrt, "w" );

@@ -18,16 +18,16 @@
 */
 
 #include "plugin.h"
+#define WA_UTILS_SIMPLE
+#include <../../loader/loader/utils.h>
 
-extern HWND *myWindow;
-extern In_Module mod;
+extern In_Module plugin;
 extern GuiDlgInfo dlg_info;
 
 DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
 {
   MyPlayer *the = (MyPlayer *)lpParameter;
 
-  long toadd = 0;
   bool stopped = false;
 
   // allocate sound buffer (2x for dsp)
@@ -56,7 +56,7 @@ DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
 	  while ((the->plr.outtime < the->plr.seek) && the->player->update())
 	    the->plr.outtime += 1000/the->player->getrefresh();
 
-	  mod.outMod->Flush((int)the->plr.outtime);
+	  plugin.outMod->Flush((int)the->plr.outtime);
 
 	  the->plr.seek = -1;
 	}
@@ -64,10 +64,10 @@ DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
       // wait for unpausing
       if (the->plr.paused)
 	{
-	  mod.outMod->Flush(mod.outMod->GetOutputTime());
+	  plugin.outMod->Flush(plugin.outMod->GetOutputTime());
 
 	  while (the->plr.paused)
-	    Sleep(10);
+	    SleepEx(10, TRUE);
 
 	  continue;
 	}
@@ -75,7 +75,7 @@ DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
       // update replayer
       if (stopped && the->work.testloop)
 	{
-	  if (!mod.outMod->IsPlaying())
+	  if (!plugin.outMod->IsPlaying())
 	  {
 		  unsigned int subsong = the->player->getsubsong();
 		  if (the->work.subseq && subsong < the->player->getsubsongs() - 1)
@@ -83,12 +83,12 @@ DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
 			  the->set_subsong(subsong + 1);
 		  }
 		  else {
-			  PostMessage(*myWindow, WM_WA_MPEG_EOF, 0, 0);
+			  PostEOF();
 		  }
 	      break;
 	  }
    
-	  Sleep(10);
+	  SleepEx(10, TRUE);
 
 	  continue;
 	}
@@ -99,37 +99,37 @@ DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
 
       while (towrite > 0)
 	{
-	  while (toadd < 0)
+	  while (the->plr.stilltoadd < 0)
 	    {
-	      toadd += the->work.replayfreq;
+		  the->plr.stilltoadd += the->work.replayfreq;
 	      stopped = !the->player->update();
 	      the->plr.outtime += 1000/the->player->getrefresh();
 	    }
 
-	  long i = min(towrite,(long)(toadd/the->player->getrefresh()+4)&~3);
+	  long i = min(towrite,(long)(the->plr.stilltoadd/the->player->getrefresh()+4)&~3);
 
 	  the->output.emu->update((short *)sndbufpos,i);
 
 	  sndbufpos += i * sampsize;
 	  towrite -= i;
 	  i = (long)(i * the->player->getrefresh());
-	  toadd -= max(1, i);
+	  the->plr.stilltoadd -= max(1, i);
 	}
 
       // update dsp
-      towrite = mod.dsp_dosamples((short *)sndbuf,DFL_SNDBUFSIZE,(the->work.use16bit ? 16 : 8),(the->work.stereo ? 2 : 1),the->work.replayfreq);
+      towrite = plugin.dsp_dosamples((short *)sndbuf,DFL_SNDBUFSIZE,(the->work.use16bit ? 16 : 8),(the->work.stereo ? 2 : 1),the->work.replayfreq);
       towrite *= sampsize;
 
       // wait for output plugin
-      while (mod.outMod->CanWrite() < towrite)
-	Sleep(10);
+      while (plugin.outMod->CanWrite() < towrite)
+	    SleepEx(10, TRUE);
 
       // write sound buffer
-      mod.outMod->Write(sndbuf,towrite);
+      plugin.outMod->Write(sndbuf,towrite);
 
       // vis
-      mod.SAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),mod.outMod->GetWrittenTime());
-      mod.VSAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),mod.outMod->GetWrittenTime());
+      plugin.SAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),plugin.outMod->GetWrittenTime());
+      plugin.VSAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),plugin.outMod->GetWrittenTime());
 
       // update FileInfo
       dlg_info.update();
@@ -179,7 +179,7 @@ DWORD WINAPI MyPlayer::callback_disk(LPVOID lpParameter)
 		{
 			the->set_subsong(subsong + 1);
 		} else {
-			PostMessage(*myWindow, WM_WA_MPEG_EOF, 0, 0);
+			PostEOF();
 		}
 		break;
 	}
@@ -192,7 +192,7 @@ DWORD WINAPI MyPlayer::callback_disk(LPVOID lpParameter)
 	    // update FileInfo, if needed
 	    dlg_info.update();
 
-	    Sleep((DWORD)(1000/the->player->getrefresh()));
+	    SleepEx((DWORD)(1000/the->player->getrefresh()), TRUE);
 	  }
       }
 

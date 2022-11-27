@@ -18,9 +18,10 @@
 */
 
 #include "plugin.h"
+#define WA_UTILS_SIMPLE
+#include <../../loader/loader/utils.h>
 
-extern HINSTANCE myInstance;
-extern HWND *myWindow;
+extern In_Module plugin;
 extern MyPlayer my_player;
 
 GuiDlgInfo::GuiDlgInfo()
@@ -63,7 +64,7 @@ int GuiDlgInfo::open(const char *file, HWND parent)
 
   // create window, if not exist
   if (!fileinfo_hwnd)
-    fileinfo_hwnd = CreateDialogParam(myInstance,MAKEINTRESOURCE(IDD_FILEINFO),parent,(DLGPROC)DlgProc_Wrapper,(LPARAM)this);
+    fileinfo_hwnd = CreateDialogParam(plugin.hDllInstance,MAKEINTRESOURCEW(IDD_FILEINFO),parent,(DLGPROC)DlgProc_Wrapper,(LPARAM)this);
   else
     SendMessage(fileinfo_hwnd,WM_UPDATE_ALL,0,0);
 
@@ -124,9 +125,9 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
     case WM_UPDATE_ALL:
 
       // set "title"/"author"/"type"
-      SetDlgItemText(hwndDlg,IDC_TITLE,fileinfo_player->gettitle().insert(0," ").c_str());
-      SetDlgItemText(hwndDlg,IDC_AUTHOR,fileinfo_player->getauthor().insert(0," ").c_str());
-      SetDlgItemText(hwndDlg,IDC_FORMAT,fileinfo_player->gettype().insert(0," ").c_str());
+      SetDlgItemTextA(hwndDlg,IDC_TITLE,fileinfo_player->gettitle().insert(0," ").c_str());
+      SetDlgItemTextA(hwndDlg,IDC_AUTHOR,fileinfo_player->getauthor().insert(0," ").c_str());
+      SetDlgItemTextA(hwndDlg,IDC_FORMAT,fileinfo_player->gettype().insert(0," ").c_str());
 
       // set "instruments"
       bufxstr.erase();
@@ -142,7 +143,7 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
 	  if (i < fileinfo_player->getinstruments() - 1)
 	    bufxstr += "\r\n";
 	}
-      SetDlgItemText(hwndDlg,IDC_INSTLIST,bufxstr.c_str());
+      SetDlgItemTextA(hwndDlg,IDC_INSTLIST,bufxstr.c_str());
 
       // set "description" (ANSI "\n" to Windows "\r\n")
       bufxstr = fileinfo_player->getdesc();
@@ -151,7 +152,7 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
 	  bufxstr.insert(spos,"\r");
 	  spos += 2;
 	}
-      SetDlgItemText(hwndDlg,IDC_DESCRIPTION,bufxstr.c_str());
+      SetDlgItemTextA(hwndDlg,IDC_DESCRIPTION,bufxstr.c_str());
 
       // set "subsong" slider
       SendDlgItemMessage(hwndDlg,IDC_SUBSONGSLIDER,TBM_SETRANGE,(WPARAM)FALSE,(LPARAM)MAKELONG(1,fileinfo_player->getsubsongs()));
@@ -177,7 +178,7 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
       if (fileinfo_player == my_player.get_player())
 	SetDlgItemInt(hwndDlg,IDC_SUBSONG,my_player.get_subsong() + 1,FALSE);
       else
-	SetDlgItemText(hwndDlg,IDC_SUBSONG,"--");
+	SetDlgItemText(hwndDlg,IDC_SUBSONG,TEXT("--"));
 
       SetDlgItemInt(hwndDlg,IDC_SUBSONGMAX,fileinfo_player->getsubsongs(),FALSE);
 
@@ -211,7 +212,7 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
 	  fi_refresh = fileinfo_player->getrefresh();
 
 	  sprintf(bufstr,"%.2f Hz",fi_refresh);
-	  SetDlgItemText(hwndDlg,IDC_TIMER,bufstr);
+	  SetDlgItemTextA(hwndDlg,IDC_TIMER,bufstr);
 	}
 
       return TRUE;
@@ -266,9 +267,12 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
 BOOL APIENTRY GuiDlgInfo::DlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
   if (message == WM_INITDIALOG)
-    SetWindowLong(hwndDlg,GWL_USERDATA,(LONG)lParam);
+  {
+	DarkModeSetup(hwndDlg);
+    SetWindowLongPtr(hwndDlg,GWLP_USERDATA,(LONG_PTR)lParam);
+  }
 
-  GuiDlgInfo *the = (GuiDlgInfo *)GetWindowLong(hwndDlg,GWL_USERDATA);
+  GuiDlgInfo *the = (GuiDlgInfo *)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 
   if (!the)
     return FALSE;

@@ -34,6 +34,7 @@ enum t_output {
 
 struct t_config_data {
   int            replayfreq;
+  bool           useoutputplug;
   bool           harmonic;
   bool           use16bit;
   bool           stereo;
@@ -41,14 +42,12 @@ struct t_config_data {
   enum t_output  useoutput_alt;
   bool           testloop;
   bool           subseq;
-  int            priority;
   int            stdtimer;
-  string         diskdir;
-  string         ignored;
-  bool           useoutputplug;
-  string         db_file;
+  wstring        diskdir;
+  wstring        ignored;
+  wstring        db_file;
   bool           usedb;
-  bool           s3m_workaround;
+  bool           lastprefstab;
 };
 
 class Config
@@ -57,27 +56,28 @@ class Config
 
   Config();
 
-  void		load();
-  void		save();
+  void		load(void);
+  void		save(void);
 
   void		get(t_config_data *cfg);
   void		set(t_config_data *cfg);
 
-  const char *	get_ignored();
-  void		set_ignored(const char *ignore_list);
+  const wchar_t *	get_ignored(void);
+  void		set_ignored(const wchar_t *ignore_list);
 
   bool		useoutputplug;
 
  private:
 
   void		apply(bool testout);
-  bool		use_database();
+  bool		use_database(void);
 
-  void		check();
+  void		check(void);
 
-  bool		test_xmplay();
+#ifdef FOR_XMPLAY
+  bool		test_xmplay(void);
+#endif
 
-  string			fname;
   static CAdPlugDatabase	*mydb;
 
   t_config_data	work, next;

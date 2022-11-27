@@ -34,18 +34,19 @@
 #include <commctrl.h>
 #include <shlobj.h>
 #include <shlwapi.h>
+#include <strsafe.h>
 #include <winioctl.h>
 
 // adplug
-#include <adplug/adplug.h>
-#include <adplug/diskopl.h>
-#include <adplug/emuopl.h>
-#include <adplug/kemuopl.h>
-#include <adplug/realopl.h>
-#include <adplug/silentopl.h>
-#include <adplug/surroundopl.h>
-#include <adplug/wemuopl.h>
-#include <adplug/nemuopl.h>
+#include <adplug.h>
+#include <diskopl.h>
+#include <emuopl.h>
+#include <kemuopl.h>
+#include <realopl.h>
+#include <silentopl.h>
+#include <surroundopl.h>
+#include <wemuopl.h>
+#include <nemuopl.h>
 
 // stl
 #include <string>
@@ -54,20 +55,15 @@
 using namespace std;
 
 // winamp
-#include "frontend.h"
-#include "in2.h"
-
-#define WM_WA_MPEG_EOF WM_USER+2
+#include <winamp/wa_cup.h>
+#include <winamp/in2.h>
 
 // in_adlib
 #include "config.h"
 #include "filetypes.h"
-#include "player.h"
-#include "dlg_about.h"
+#include "myplayer.h"
 #include "dlg_config.h"
 #include "dlg_info.h"
-#include "gui_link.h"
-#include "gui_tip.h"
 
 #include "resource.h"
 #include "version.h"
@@ -79,9 +75,11 @@ using namespace std;
 
 struct TEmulInfo {
 	t_output emul;
-	char * name;
-	char * description;
+	const wchar_t * name;
+	const wchar_t * description;
 	bool s_multi;       /* emulator allows multiple instances */
 	bool s_mono;        /* emulator supports mono output */
 	bool s_8bit;        /* emulator supports 8-bit PCM output */
 };
+
+void SetFileExtensions(const wchar_t* ignore_list);

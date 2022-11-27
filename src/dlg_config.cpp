@@ -18,16 +18,20 @@
 */
 
 #include "plugin.h"
+#include <commdlg.h>
+#include <../../loader/loader/paths.h>
+#include <../../loader/loader/utils.h>
+#include "api.h"
 
 #define STRING_TRUNC	55
 #define TOOLTIP_WIDTH	300
 
-extern HINSTANCE	myInstance;
+extern In_Module	plugin;
 extern Config		config;
 extern FileTypes	filetypes;
 extern TEmulInfo	infoEmuls[MAX_EMULATORS];
 
-GuiCtrlTooltip		*tooltip;
+//GuiCtrlTooltip		*tooltip;
 
 void AdjustComboBoxHeight(HWND hWndCmbBox, DWORD MaxVisItems) {
 RECT rc;
@@ -36,7 +40,7 @@ RECT rc;
   ScreenToClient(GetParent(hWndCmbBox), (POINT *) &rc);
   rc.bottom = (MaxVisItems + 2) * SendMessage(hWndCmbBox, CB_GETITEMHEIGHT, 0, 0);
   MoveWindow(hWndCmbBox, rc.left, rc.top, rc.right, rc.bottom, TRUE);
-  SetWindowLong(hWndCmbBox, GWL_STYLE, (GetWindowLong(hWndCmbBox, GWL_STYLE) | CBS_NOINTEGRALHEIGHT) ^ CBS_NOINTEGRALHEIGHT);
+  SetWindowLongPtr(hWndCmbBox, GWL_STYLE, (GetWindowLongPtr(hWndCmbBox, GWL_STYLE) | CBS_NOINTEGRALHEIGHT) ^ CBS_NOINTEGRALHEIGHT);
 }
 
 int getComboIndexByEmul(int emul, bool duo)
@@ -69,11 +73,8 @@ void GuiDlgConfig::open(HWND parent)
 {
   config.get(&next);
 
-  DialogBoxParam(myInstance,MAKEINTRESOURCE(IDD_CONFIG),parent,(DLGPROC)DlgProc_Wrapper,(LPARAM)this);
-  delete tooltip;
-
-  if (!cancelled)
-    config.set(&next);
+  SetWindowLongPtr(parent, GWLP_USERDATA, (LONG_PTR)this);
+  DlgProc_Wrapper(parent, WM_INITDIALOG, 0, 0);
 }
 
 BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -81,89 +82,109 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
 #ifdef DEBUG
   //printf("GuiDlgConfig::DlgProc(): Message 0x%08X received. wParam = 0x%08X, lParam = 0x%08X\n", message, wParam, lParam);
 #endif
-  TCITEM tci;
 
   switch (message)
     {
     case WM_INITDIALOG:
-      tab_hwnd = NULL;
+    {
+      TCITEM tci = { 0 };
+      DarkModeSetup(hwndDlg);
 
       // enable tooltips
-      tooltip = new GuiCtrlTooltip(hwndDlg);
+      /*tooltip = new GuiCtrlTooltip(hwndDlg);
 
       // enable tooltip trigger
-      tooltip->trigger(GetDlgItem(hwndDlg,IDC_TOOLTIPS));
+      tooltip->trigger(GetDlgItem(hwndDlg,IDC_TOOLTIPS));*/
 
       // init tab control
       tci.mask = TCIF_TEXT;
 
-      tci.pszText = "Output";
-      SendDlgItemMessage(hwndDlg,IDC_CTABS,TCM_INSERTITEM,0,(LPARAM)&tci);
+      // TODO localise
+      tci.pszText = TEXT("Output");
+      SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,0,(LPARAM)&tci);
 		
-      tci.pszText = "Playback";
-      SendDlgItemMessage(hwndDlg,IDC_CTABS,TCM_INSERTITEM,1,(LPARAM)&tci);
+      tci.pszText = TEXT("Formats");
+      SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,1,(LPARAM)&tci);
 		
-      tci.pszText = "Formats";
-      SendDlgItemMessage(hwndDlg,IDC_CTABS,TCM_INSERTITEM,2,(LPARAM)&tci);
+      // display new tab window
+      HWND hTab = GetDlgItem(hwndDlg,IDC_TABBED_PREFS_TAB);
+
+      RECT r = { 0 };
+      GetClientRect(hTab, &r);
+      TabCtrl_AdjustRect(hTab, 0, &r);
+      for (int i = 0; i < 2; i++)
+      {
+        HWND tab_hwnd = CreateDialogParam(plugin.hDllInstance, MAKEINTRESOURCEW((!i ?
+                                          IDD_CFG_OUTPUT : IDD_CFG_FORMATS)), hwndDlg,
+                                          (DLGPROC)(!i ? OutputTabDlgProc_Wrapper :
+                                          FormatsTabDlgProc_Wrapper), (LPARAM)this);
+		if (IsWindow(tab_hwnd))
+        {
+          UXThemeFunc((WPARAM)tab_hwnd);
+		  // make sure that we're creating the window before the tab control
+		  // otherwise the tab order can be a bit odd & skinned prefs fails!
+		  SetWindowPos(tab_hwnd, HWND_TOP, (r.left + 5), (r.top + 9),
+					   (r.right - r.left), (r.bottom - r.top),
+					   SWP_SHOWWINDOW | SWP_NOACTIVATE);
+		  SetWindowLongPtr(tab_hwnd, GWL_ID, 10000 + i);
+		}
+      }
 
       // set default tab index
-      SendDlgItemMessage(hwndDlg,IDC_CTABS,TCM_SETCURSEL,0,0);
-
-    case WM_UPDATE:
-
-      // delete old tab window
-      if (tab_hwnd)
-	{
-	  DestroyWindow(tab_hwnd);
-
-	  tab_hwnd = NULL;
-	}
-
-      // display new tab window
-      tab_index = (int)SendDlgItemMessage(hwndDlg,IDC_CTABS,TCM_GETCURSEL,0,0);
-
-      if (tab_index == 0)
-	tab_hwnd = CreateDialogParam(myInstance,MAKEINTRESOURCE(IDD_CFG_OUTPUT),GetDlgItem(hwndDlg,IDC_CTABS),(DLGPROC)TabDlgProc_Wrapper,(LPARAM)this);
-      if (tab_index == 1)
-	tab_hwnd = CreateDialogParam(myInstance,MAKEINTRESOURCE(IDD_CFG_PLAYBACK),GetDlgItem(hwndDlg,IDC_CTABS),(DLGPROC)TabDlgProc_Wrapper,(LPARAM)this);
-      if (tab_index == 2)
-	tab_hwnd = CreateDialogParam(myInstance,MAKEINTRESOURCE(IDD_CFG_FORMATS),GetDlgItem(hwndDlg,IDC_CTABS),(DLGPROC)TabDlgProc_Wrapper,(LPARAM)this);
-
-      return FALSE;
-
-
-    case WM_NOTIFY:
-      switch (((NMHDR *)lParam)->code)
-	{
-	case TCN_SELCHANGE:
-	  PostMessage(hwndDlg,WM_UPDATE,0,0);
-	  return FALSE;
-
-	case TTN_GETDISPINFO:
-	  SendMessage(((NMHDR *)lParam)->hwndFrom, TTM_SETMAXTIPWIDTH, 0, TOOLTIP_WIDTH);
-	  ((LPNMTTDISPINFO)lParam)->lpszText = (char *)((LPNMTTDISPINFO)lParam)->lParam;
-	  return 0;
-	}
-
-      return FALSE;
-
-
-    case WM_COMMAND:
-      switch (LOWORD(wParam))
-	{
-	case IDOK:
-	  cancelled = false;
-	  EndDialog(hwndDlg,wParam);
-	  return FALSE;
-
-	case IDCANCEL:
-	  cancelled = true;
-	  EndDialog(hwndDlg,wParam);
-	  return FALSE;
-	}
+      NMHDR nmh = { hTab, IDC_TABBED_PREFS_TAB, TCN_SELCHANGE };
+      SendMessage(nmh.hwndFrom, TCM_SETCURSEL, next.lastprefstab, 0);
+      SendMessage(hwndDlg, WM_NOTIFY, IDC_TABBED_PREFS_TAB, (LPARAM)&nmh);
     }
+    case WM_NOTIFY:
+    {
+	  if (LOWORD(wParam) == IDC_TABBED_PREFS_TAB)
+      {
+        if (((LPNMHDR)lParam)->code == TCN_SELCHANGE)
+        {
+          next.lastprefstab = !!TabCtrl_GetCurSel(((LPNMHDR)lParam)->hwndFrom);
 
-  return FALSE;
+          for (size_t i = 0; i < 2; i++)
+          {
+            HWND tab_hwnd = GetDlgItem(hwndDlg, 10000 + i);
+            if (IsWindow(tab_hwnd))
+	{
+              const bool show_tab = (!!i == next.lastprefstab);
+              ShowWindow(tab_hwnd, (show_tab ? SW_SHOWNA : SW_HIDE));
+            }
+          }
+        }
+      }
+      return TRUE;
+	}
+    case WM_DESTROY:
+    {
+      // make sure the child dialogs are closed
+      // so any changes from them will be saved
+      DestroyWindow(GetDlgItem(hwndDlg, 10000));
+      DestroyWindow(GetDlgItem(hwndDlg, 10001));
+
+      config.set(&next);
+
+      config.save();
+
+      const wchar_t* ignore_list = filetypes.get_ignore_list();
+      config.set_ignored(ignore_list);
+
+      SetFileExtensions(ignore_list);
+    }
+  }
+	  return FALSE;
+	}
+
+int CALLBACK APIENTRY BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
+{
+	if (uMsg == BFFM_INITIALIZED)
+	{
+		DarkModeSetup(hwnd);
+
+		SendMessage(hwnd, BFFM_SETSELECTIONW, 1, lpData);
+	}
+	return 0;
 }
 
 BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -171,13 +192,13 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
 #ifdef DEBUG
   //printf("GuiDlgConfig::OutputTabDlgProc(): Message 0x%08X received.\n",message);
 #endif
-  string bufxstr;
   int i;
 
   switch (message)
     {
     case WM_INITDIALOG: {
-
+      DarkModeSetup(hwndDlg);
+#if 0
       // add tooltips
       tooltip->add(GetDlgItem(hwndDlg,IDC_FREQ1),      "freq1",      "Set 11 kHz frequency.  Be aware that some notes will be the wrong pitch if this rate is used.");
       tooltip->add(GetDlgItem(hwndDlg,IDC_FREQ2),      "freq2",      "Set 22 kHz frequency.  Be aware that some notes will be the wrong pitch if this rate is used.");
@@ -192,6 +213,12 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
       tooltip->add(GetDlgItem(hwndDlg,IDC_STEREO),     "stereo",     "Set stereo output.");
       tooltip->add(GetDlgItem(hwndDlg,IDC_SURROUND),   "surround",   "Set stereo output with a harmonic chorus effect.");
       tooltip->add(GetDlgItem(hwndDlg,IDC_DIRECTORY),  "directory",  "Select output directory for Disk Writer.");
+      tooltip->add(GetDlgItem(hwndDlg,IDC_TESTLOOP),"autoend" ,"Enable song-end auto-detection:\r\nIf disabled, the song will loop endlessly, and Winamp won't advance in the playlist.");
+      tooltip->add(GetDlgItem(hwndDlg,IDC_SUBSEQ),"subseq" ,"Play all subsongs in the file:\r\nIf enabled, the player will switch to the next available subsong on the song end. This option requires song-end auto-detection to be enabled.");
+      tooltip->add(GetDlgItem(hwndDlg,IDC_STDTIMER),"stdtimer","Use actual replay speed for Disk Writer output:\r\nDisable this for full speed disk writing. Never disable this if you also disabled song-end auto-detection!");
+      tooltip->add(GetDlgItem(hwndDlg,IDC_DATABASE),"database","Set path to Database file to be used for replay information.");
+      tooltip->add(GetDlgItem(hwndDlg,IDC_USEDB),"usedb","If unchecked, the Database will be disabled.");
+#endif
 
       // set "output"
       if (next.useoutput == disk)
@@ -203,6 +230,7 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
         if (infoEmuls[i].s_multi)
           SendDlgItemMessage(hwndDlg, IDC_COMBO2, CB_ADDSTRING, 0, (LPARAM)infoEmuls[i].name);
       }
+
       // adjust combobox height or dropdown lists won't be visible at all
       AdjustComboBoxHeight(GetDlgItem(hwndDlg, IDC_COMBO1), 5);
       AdjustComboBoxHeight(GetDlgItem(hwndDlg, IDC_COMBO2), 5);
@@ -250,29 +278,32 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
         CheckRadioButton(hwndDlg,IDC_MONO,IDC_SURROUND,IDC_MONO);
 
       // set "directory"
-      bufxstr = tmpxdiskdir = next.diskdir;
-      if (bufxstr.size() > STRING_TRUNC)
-	{
-	  bufxstr.resize(STRING_TRUNC);
-	  bufxstr.append("...");
-	}
-      SetDlgItemText(hwndDlg,IDC_DIRECTORY,bufxstr.c_str());
+      SetDlgItemText(hwndDlg,IDC_DIRECTORY, next.diskdir.c_str());
 
       syncControlStates(hwndDlg);
+
+      // set checkboxes
+      if (next.testloop)
+	    CheckDlgButton(hwndDlg,IDC_TESTLOOP,BST_CHECKED);
+      if (next.subseq)
+	    CheckDlgButton(hwndDlg,IDC_SUBSEQ,BST_CHECKED);
+      if (next.stdtimer)
+	    CheckDlgButton(hwndDlg,IDC_STDTIMER,BST_CHECKED);
+      if (next.usedb)
+	    CheckDlgButton(hwndDlg,IDC_USEDB,BST_CHECKED);
+
+	  EnableWindow(GetDlgItem(hwndDlg, IDC_SUBSEQ), next.testloop);
+
+      // set "database"
+      SetDlgItemText(hwndDlg,IDC_DATABASE,next.db_file.c_str());
 
       // move tab content on top
       SetWindowPos(hwndDlg,HWND_TOP,3,22,0,0,SWP_NOSIZE);
 
-      return FALSE;
+      break;
     }
     case WM_DESTROY:
-
-      if (cancelled)
 	{
-	  next.diskdir = tmpxdiskdir;
-	  return 0;
-	}
-
       // check "frequency"
       if (IsDlgButtonChecked(hwndDlg,IDC_FREQ1) == BST_CHECKED)
         next.replayfreq = 11025;
@@ -320,157 +351,80 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
       if (IsDlgButtonChecked(hwndDlg,IDC_ALTSYNTH) != BST_CHECKED) {
         next.useoutput_alt = emunone;
       }
-      return 0;
-
-
-    case WM_COMMAND:
-      switch (LOWORD(wParam))
-	{
-	case IDC_DIRECTORY:
-
-	  // display folder selection dialog
-	  char shd[_MAX_PATH];
-
-	  BROWSEINFO bi;
-
-	  bi.hwndOwner = hwndDlg;
-	  bi.pidlRoot = NULL;
-	  bi.pszDisplayName = shd;
-	  bi.lpszTitle = "Select output path for Disk Writer:";
-	  bi.ulFlags = BIF_RETURNONLYFSDIRS;
-	  bi.lpfn = NULL;
-	  bi.lParam = 0;
-	  bi.iImage = 0;
-
-	  if (SHGetPathFromIDList(SHBrowseForFolder(&bi),shd))
-	    {
-	      bufxstr = next.diskdir = shd;
-	      if (bufxstr.size() > STRING_TRUNC)
-		{
-		  bufxstr.resize(STRING_TRUNC);
-		  bufxstr.append("...");
-		}
-	      SetDlgItemText(hwndDlg,IDC_DIRECTORY,bufxstr.c_str());
-	    }
-
-	  return 0;
-
-    case IDC_COMBO1:
-    case IDC_COMBO2:
-    case IDC_ALTSYNTH:
-    case IDC_OUTDISK:
-      syncControlStates(hwndDlg);
-      break;
-    }
-  }
-
-  return FALSE;
-}
-
-BOOL APIENTRY GuiDlgConfig::PlaybackTabDlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-  string bufxstr;
-
-#ifdef DEBUG
-  //printf("GuiDlgConfig::PlaybackTabDlgProc(): Message 0x%08X received.\n",message);
-#endif
-  switch (message)
-    {
-    case WM_INITDIALOG:
-
-      // add tooltips
-      tooltip->add(GetDlgItem(hwndDlg,IDC_TESTLOOP),"autoend" ,"Enable song-end auto-detection:\r\nIf disabled, the song will loop endlessly, and Winamp won't advance in the playlist.");
-      tooltip->add(GetDlgItem(hwndDlg,IDC_SUBSEQ),"subseq" ,"Play all subsongs in the file:\r\nIf enabled, the player will switch to the next available subsong on the song end. This option requires song-end auto-detection to be enabled.");
-      tooltip->add(GetDlgItem(hwndDlg,IDC_STDTIMER),"stdtimer","Use actual replay speed for Disk Writer output:\r\nDisable this for full speed disk writing. Never disable this if you also disabled song-end auto-detection!");
-      tooltip->add(GetDlgItem(hwndDlg,IDC_PRIORITY),"priority","Set replay thread priority:\r\nIf you encounter sound skips, try to set this to a higher value.");
-      tooltip->add(GetDlgItem(hwndDlg,IDC_DATABASE),"database","Set path to Database file to be used for replay information.");
-      tooltip->add(GetDlgItem(hwndDlg,IDC_USEDB),"usedb","If unchecked, the Database will be disabled.");
-
-      // set checkboxes
-      if (next.testloop)
-	CheckDlgButton(hwndDlg,IDC_TESTLOOP,BST_CHECKED);
-      if (next.subseq)
-	CheckDlgButton(hwndDlg,IDC_SUBSEQ,BST_CHECKED);
-      if (next.stdtimer)
-	CheckDlgButton(hwndDlg,IDC_STDTIMER,BST_CHECKED);
-      if (next.usedb)
-	CheckDlgButton(hwndDlg,IDC_USEDB,BST_CHECKED);
-
-	EnableWindow(GetDlgItem(hwndDlg, IDC_SUBSEQ), next.testloop);
-
-      // set "priority"
-      SendDlgItemMessage(hwndDlg,IDC_PRIORITY,TBM_SETRANGE,(WPARAM)FALSE,(LPARAM)MAKELONG(1,7));
-      SendDlgItemMessage(hwndDlg,IDC_PRIORITY,TBM_SETPOS,(WPARAM)TRUE,(LPARAM)next.priority);
-
-      // set "database"
-      bufxstr = next.db_file;
-      if (bufxstr.size() > STRING_TRUNC)
-	{
-	  bufxstr.resize(STRING_TRUNC);
-	  bufxstr.append("...");
-	}
-      SetDlgItemText(hwndDlg,IDC_DATABASE,bufxstr.c_str());
-
-      // move tab content on top
-      SetWindowPos(hwndDlg,HWND_TOP,3,22,0,0,SWP_NOSIZE);
-
-      return FALSE;
-
-
-    case WM_DESTROY:
-
-      if (cancelled)
-	return 0;
 
       // check checkboxes :)
       next.testloop = (IsDlgButtonChecked(hwndDlg,IDC_TESTLOOP) == BST_CHECKED);
       next.subseq = (IsDlgButtonChecked(hwndDlg,IDC_SUBSEQ) == BST_CHECKED);
       next.stdtimer = (IsDlgButtonChecked(hwndDlg,IDC_STDTIMER) == BST_CHECKED);
       next.usedb = (IsDlgButtonChecked(hwndDlg,IDC_USEDB) == BST_CHECKED);
-
-      // check "priority"
-      next.priority = (int)SendDlgItemMessage(hwndDlg,IDC_PRIORITY,TBM_GETPOS,0,0);
-
-      return 0;
-
+      break;
+    }
     case WM_COMMAND:
+    {
       switch (LOWORD(wParam))
 	{
-	case IDC_DATABASE:
-	  OPENFILENAME ofn;
+	case IDC_DIRECTORY:
+        {
+	  // display folder selection dialog
+	      wchar_t shd[_MAX_PATH] = { 0 };
+
+          BROWSEINFO bi = { 0 };
+	  bi.hwndOwner = hwndDlg;
+	  bi.pszDisplayName = shd;
+	      bi.lpszTitle = TEXT("Select output path for Disk Writer:");
+	      bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
+          bi.lpfn = BrowseCallbackProc;
+          bi.lParam = (LONG_PTR)next.diskdir.c_str();
+
+          LPITEMIDLIST pidl = BrowseForFolder(&bi);
+	      if (pidl)
+	      {
+            next.diskdir = PathFromPIDL(pidl, shd, ARRAYSIZE(shd), true);
+            WritePrivateProfileString(L"in_adlib", L"diskdir", next.diskdir.c_str(), GetPaths()->winamp_ini_file);
+            SetDlgItemText(hwndDlg, IDC_DIRECTORY, next.diskdir.c_str());
+		}
+          break;
+	    }
+    case IDC_COMBO1:
+    case IDC_COMBO2:
+    case IDC_ALTSYNTH:
+    case IDC_OUTDISK:
+        {
+      syncControlStates(hwndDlg);
+      break;
+    }
+	    case IDC_DATABASE:
+	{
+          OPENFILENAME ofn = { 0 };
 
 	  ofn.lStructSize = sizeof(ofn);
 	  ofn.hwndOwner = hwndDlg;
-	  ofn.lpstrFilter = "AdPlug Database Files (*.DB)\0*.db\0";
-	  ofn.lpstrCustomFilter = NULL;
-	  ofn.nFilterIndex = 0;
-	  ofn.lpstrFile = (LPSTR)malloc(_MAX_PATH);
-	  strcpy(ofn.lpstrFile, next.db_file.c_str());
+	      ofn.lpstrFilter = TEXT("AdPlug Database Files (*.DB)\0*.db\0\0");
+	      ofn.lpstrFile = (LPWSTR)plugin.memmgr->sysMalloc(_MAX_PATH * sizeof(wchar_t));
+	      wcscpy(ofn.lpstrFile, next.db_file.c_str());
 	  ofn.nMaxFile = _MAX_PATH;
-	  ofn.lpstrFileTitle = NULL;
-	  ofn.lpstrInitialDir = NULL;
-	  ofn.lpstrTitle = "Select Database File";
+	      ofn.lpstrTitle = TEXT("Select Database File");
 	  ofn.Flags = OFN_FILEMUSTEXIST;
-	  ofn.lpstrDefExt = NULL;
 
-	  if (GetOpenFileName(&ofn))
+	      if (GetFileName(&ofn))
 	    {
-	      bufxstr = next.db_file = ofn.lpstrFile;
-	      if (bufxstr.size() > STRING_TRUNC)
-		{
-		  bufxstr.resize(STRING_TRUNC);
-		  bufxstr.append("...");
-		}
-	      SetDlgItemText(hwndDlg,IDC_DATABASE,bufxstr.c_str());
-	    }
+	        next.db_file = ofn.lpstrFile;
+            WritePrivateProfileString(L"in_adlib", L"database", next.db_file.c_str(), GetPaths()->winamp_ini_file);
 
-	  return 0;
+	        SetDlgItemText(hwndDlg,IDC_DATABASE, next.db_file.c_str());
+		}
+          plugin.memmgr->sysFree(ofn.lpstrFile);
+          break;
+	    }
 	case IDC_TESTLOOP:
+        {
 	  bool bTestloop = IsDlgButtonChecked(hwndDlg, IDC_TESTLOOP) == BST_CHECKED;
 	  EnableWindow(GetDlgItem(hwndDlg, IDC_SUBSEQ), bTestloop);
 	  break;
 	}
     }
+    }
+  }
 
   return FALSE;
 }
@@ -484,13 +438,14 @@ BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM
 
   switch (message)
     {
-    case WM_INITDIALOG:
-
+    case WM_INITDIALOG: {
+      DarkModeSetup(hwndDlg);
+#if 0
       // add tooltips
       tooltip->add(GetDlgItem(hwndDlg,IDC_FORMATLIST),"formatlist","All supported formats are listed here:\r\nDeselected formats will be ignored by AdPlug to make room for other plugins to play these.");
-      tooltip->add(GetDlgItem(hwndDlg,IDC_FTWORKAROUND),"ftworkaround","Enable this if you can't play any sample based S3M files with Nullsoft's Module Decoder plugin anymore.");
       tooltip->add(GetDlgItem(hwndDlg,IDC_FTSELALL),  "ftselall",  "Select all formats.");
       tooltip->add(GetDlgItem(hwndDlg,IDC_FTDESELALL),  "ftdeselall",  "Deselect all formats.");
+#endif
 
       // fill listbox
       for (i=0;i<filetypes.get_size();i++)
@@ -499,41 +454,31 @@ BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM
 	  SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,(WPARAM)!filetypes.get_ignore(i),i);
 	}
 
-      // set checkboxes
-      if(next.s3m_workaround)
-	CheckDlgButton(hwndDlg, IDC_FTWORKAROUND, BST_CHECKED);
-
       // move tab content on top
       SetWindowPos(hwndDlg,HWND_TOP,3,22,0,0,SWP_NOSIZE);
 
-      return FALSE;
-
+      break;
+    }
 
     case WM_DESTROY:
-
-      if (cancelled)
-	return 0;
-
+    {
       // read listbox
       for (i=0;i<filetypes.get_size();i++)
 	filetypes.set_ignore(i,SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_GETSEL,i,0) ? false : true);
 
-      // get checkboxes
-      next.s3m_workaround = (IsDlgButtonChecked(hwndDlg,IDC_FTWORKAROUND) == BST_CHECKED);
-
-      return 0;
-
+      break;
+    }
 
     case WM_COMMAND:
       switch (LOWORD(wParam))
 	{
 	case IDC_FTSELALL:
 	  SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,TRUE,-1);
-	  return 0;
+        break;
 
 	case IDC_FTDESELALL:
 	  SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,FALSE,-1);
-	  return 0;
+        break;
 	}
     }
 
@@ -542,10 +487,7 @@ BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM
 
 BOOL APIENTRY GuiDlgConfig::DlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
-  if (message == WM_INITDIALOG)
-    SetWindowLong(hwndDlg,GWL_USERDATA,(LONG)lParam);
-
-  GuiDlgConfig *the = (GuiDlgConfig *)GetWindowLong(hwndDlg,GWL_USERDATA);
+  GuiDlgConfig *the = (GuiDlgConfig *)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 
   if (!the)
     return FALSE;
@@ -553,36 +495,46 @@ BOOL APIENTRY GuiDlgConfig::DlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM w
   return the->DlgProc(hwndDlg,message,wParam,lParam);
 }
 
-BOOL APIENTRY GuiDlgConfig::TabDlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
   if (message == WM_INITDIALOG)
-    SetWindowLong(hwndDlg,GWL_USERDATA,(LONG)lParam);
+    SetWindowLongPtr(hwndDlg,GWLP_USERDATA,(LONG_PTR)lParam);
 
-  GuiDlgConfig *the = (GuiDlgConfig *)GetWindowLong(hwndDlg,GWL_USERDATA);
+  GuiDlgConfig *the = (GuiDlgConfig *)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
 
   if (!the)
     return FALSE;
 
-  if (the->tab_index == 0)
-    return the->OutputTabDlgProc(hwndDlg,message,wParam,lParam);
-  if (the->tab_index == 1)
-    return the->PlaybackTabDlgProc(hwndDlg,message,wParam,lParam);
-  //if (the->tab_index == 2)
+  return the->OutputTabDlgProc(hwndDlg,message,wParam,lParam);
+}
+
+BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc_Wrapper(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+  if (message == WM_INITDIALOG)
+    SetWindowLongPtr(hwndDlg,GWLP_USERDATA,(LONG_PTR)lParam);
+
+  GuiDlgConfig *the = (GuiDlgConfig *)GetWindowLongPtr(hwndDlg,GWLP_USERDATA);
+
+  if (!the)
+    return FALSE;
+
   return the->FormatsTabDlgProc(hwndDlg,message,wParam,lParam);
 }
 
-void GuiDlgConfig::syncControlStates(HWND hwndDlg)
+void GuiDlgConfig::syncControlStates(HWND hwndDlg) const
 {
   int i = SendDlgItemMessage(hwndDlg, IDC_COMBO1, CB_GETCURSEL, 0, 0);
+  if (i == CB_ERR) return;
+
   bool bEmuMulti = infoEmuls[i].s_multi;
   bool bEmuMono = infoEmuls[i].s_mono;
   bool bEmu8bit = infoEmuls[i].s_8bit;
   bool bOutDisk = IsDlgButtonChecked(hwndDlg, IDC_OUTDISK) == BST_CHECKED;
-  if ((i >= 0) && (i < MAX_EMULATORS)) {
+  if (/*(i >= 0) && */(i < MAX_EMULATORS)) {
     SetDlgItemText(hwndDlg, IDC_EMUINFO, infoEmuls[i].description);
   }
   bool bAltSynth = IsDlgButtonChecked(hwndDlg, IDC_ALTSYNTH) == BST_CHECKED;
-  bool bIsStereo = IsDlgButtonChecked(hwndDlg, IDC_STEREO) == BST_CHECKED;
+  //bool bIsStereo = IsDlgButtonChecked(hwndDlg, IDC_STEREO) == BST_CHECKED;
   bool bIsSurround = IsDlgButtonChecked(hwndDlg, IDC_SURROUND) == BST_CHECKED;
   bool bWasSurroundEnabled = IsWindowEnabled(GetDlgItem(hwndDlg, IDC_SURROUND)) == TRUE;
 

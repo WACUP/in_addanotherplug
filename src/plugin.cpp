@@ -18,60 +18,142 @@
 */
 
 #include "plugin.h"
+#include"api.h"
+
+#include <../../loader/loader/paths.h>
+#define WA_UTILS_SIMPLE
+#include <../../loader/loader/utils.h>
+#include <../../sdk/nu/autocharfn.h>
+#include <../../sdk/nu/autowide.h>
 
 #ifdef DEBUG
 #	include "debug.h"
 #endif
 
-HINSTANCE		myInstance;
-HWND			*myWindow;
+extern In_Module	plugin;
 
-extern In_Module	mod;
+static prefsDlgRecW* preferences;
 
+CRITICAL_SECTION g_ft_cs = { 0 };
 Config			config;
 FileTypes		filetypes;
 MyPlayer		my_player;
-GuiDlgAbout		dlg_about;
 GuiDlgConfig		dlg_config;
 GuiDlgInfo		dlg_info;
 
 TEmulInfo infoEmuls[MAX_EMULATORS] = {
-  {emunk, "Nuked OPL3 (Nuke.YKT, 2017)",
-    "Nuked OPL3 emulator by Alexey Khokholov (Nuke.YKT). Set output frequency to 49716 Hz for best quality.",
+  {emunk, TEXT("Nuked OPL3 (Nuke.YKT, 2017)"),
+    TEXT("Nuked OPL3 emulator by Alexey Khokholov (Nuke.YKT). "
+         "Set output frequency to 49716 Hz for best quality."),
     true, false, false},
-  {emuwo, "WoodyOPL (DOSBox, 2016)",
-    "This is the most accurate OPL emulator, especially when the frequency is set to 49716 Hz.",
+  {emuwo, TEXT("WoodyOPL (DOSBox, 2016)"),
+    TEXT("This is the most accurate OPL emulator, especially "
+         "when the frequency is set to 49716 Hz."),
     true, true, true},
-  {emuts, "Tatsuyuki Satoh 0.72 (MAME, 2003)",
-    "While not perfect, this synth comes very close and for many years was the best there was.",
+  {emuts, TEXT("Tatsuyuki Satoh 0.72 (MAME, 2003)"),
+    TEXT("While not perfect, this synth comes very close "
+         "and for many years was the best there was."),
     true, true, true},
-  {emuks, "Ken Silverman (2001)",
-    "While inaccurate by today's standards, this emulator was one of the earliest open-source OPL synths available.",
+  {emuks, TEXT("Ken Silverman (2001)"),
+    TEXT("While inaccurate by today's standards, this emulator was "
+         "one of the earliest open-source OPL synths available."),
     false, true, true},
 };
 
-void wa2_Init()
+void read_config(void)
 {
-  myInstance = mod.hDllInstance;
-  myWindow = &mod.hMainWindow;
+  static bool config_read;
+  if (!config_read)
+  {
+    config_read = true;
+
+    t_config_data	cfg;
+    config.load();
+    config.get(&cfg);
+
+    plugin.UsesOutputPlug = config.useoutputplug;
+}
 }
 
-void wa2_Quit()
+/*typedef struct
 {
-  free(mod.FileExtensions);
+    UINT ctrl_id, dlg_id, name;
+    DLGPROC proc;
+} TABDESC;
+
+#define IDC_CONFIG_TAB1 10000
+#define IDC_CONFIG_TAB2 10001
+
+static TABDESC tabs[] =
+{
+    {IDC_CONFIG_TAB1, DlgCfgPlayback, IDD_CFG_OUTPUT, CfgDlgPlaybackProc},
+    {IDC_CONFIG_TAB2, DlgCfgMuting, IDD_CFG_FORMATS, CfgDlgMutingProc},
+};*/
+
+// Dialogue box callback function
+INT_PTR CALLBACK ConfigDialogProc(HWND hwndDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+  if (message == WM_INITDIALOG)
+  {
+    // make sure that we're all initialised as we can be
+    // accessed via a few different ways outside of just
+    // having our config(..) called so we don't crash...
+    read_config();
+
+    dlg_config.open(hwndDlg);
+    return TRUE;
+  }
+  return dlg_config.DlgProc_Wrapper(hwndDlg, message, wParam, lParam);
+}
+
+int wa2_Init(void)
+{
+  // TODO localise
+  wchar_t description[256] = { 0 };
+  // "AdPlug v" ADPLUG_VERSION "/v" PLUGIN_VERSION
+  StringCchPrintfW(description, ARRAYSIZE(description), L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
+  plugin.description = (char*)plugin.memmgr->sysDupStr(description);
+
+  preferences = (prefsDlgRecW*)GlobalAlloc(GPTR, sizeof(prefsDlgRecW));
+  if (preferences)
+  {
+      // TODO localise
+      preferences->hInst = GetModuleHandle(GetPaths()->wacup_core_dll);
+      preferences->dlgID = IDD_TABBED_PREFS_DIALOG;
+      preferences->name = /*WASABI_API_LNGSTRINGW_DUP(IDS_VGM)*/plugin.memmgr->sysDupStr(L"ADLIB | ADPLUG");
+      preferences->proc = ConfigDialogProc;
+      preferences->where = 10;
+      preferences->_id = 100;
+      preferences->next = (_prefsDlgRec*)0xACE;
+      AddPrefsPage((WPARAM)preferences, TRUE);
+  }
+
+#ifdef DEBUG
+  debug_init();
+#endif
+
+  InitializeCriticalSectionEx(&g_ft_cs, 400, CRITICAL_SECTION_NO_DEBUG_INFO);
+
+  return IN_INIT_SUCCESS;
+}
+
+void wa2_Quit(void)
+{
+  /*free(plugin.FileExtensions);
   config.set_ignored(filetypes.get_ignore_list());
-  config.save();
+  config.save();*/
+  DeleteCriticalSection(&g_ft_cs);
 }
 
-int wa2_IsOurFile(char *fn)
+/*int wa2_IsOurFile(const in_char *file)
 {
-  // ignored ?
-  if (filetypes.grata(fn))
+  AutoCharFn fn(file);
+  if (filetypes.grata(fn) != -1)
     {
       CSilentopl silent;
 
       // try to make adplug player
-      CPlayer *p = CAdPlug::factory(fn,&silent);
+    CPlayer* p = CAdPlug::factory(std::string(fn), &silent);
 
       if (p)
 	{
@@ -79,12 +161,12 @@ int wa2_IsOurFile(char *fn)
 	  return 1;
 	}
     }
-
   return 0;
-}
+}*/
 
-void wa2_GetFileInfo(char *file, char *title, int *length_in_ms)
+void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 {
+  AutoCharFn fn(file);
   const char *my_file;
 
   // current file ?
@@ -93,15 +175,15 @@ void wa2_GetFileInfo(char *file, char *title, int *length_in_ms)
   else
     {
       // our file ?
-      if (!wa2_IsOurFile(file))
-	return;
+    /*if (!wa2_IsOurFile(file))
+	  return;*/
 
-      my_file = file;
+    my_file = fn;
     }
 
   // set default info
   if (title)
-    strcpy(title,strrchr(my_file,'\\')+1);
+    wcscpy(title, AutoWide(strrchr(my_file, '\\') + 1));
 
   if (length_in_ms)
     *length_in_ms = 0;
@@ -113,61 +195,62 @@ void wa2_GetFileInfo(char *file, char *title, int *length_in_ms)
 
   if (p)
     {
+      // TODO
       if (title)
       {
         // Wraithverge: modified this code to show the "Author" + "Title"
         // in the "Song Title" window, instead of just "Title", but only
         // if both Tag-data exists.
         if (!p->getauthor().empty() && !p->gettitle().empty()) {
-          strcpy(title, p->getauthor().c_str());
-          strcat(title, " - ");
-          strcat(title, p->gettitle().c_str());
+          wcscpy(title, AutoWide(p->getauthor().c_str()));
+          wcscat(title, L" - ");
+          wcscat(title, AutoWide(p->gettitle().c_str()));
         }
         else if (!p->gettitle().empty())
-          strcpy(title, p->gettitle().c_str());
+          wcscpy(title, AutoWide(p->gettitle().c_str()));
       }
 
       if (length_in_ms)
-	if (file)
-	  *length_in_ms = my_player.get_length(my_file,my_player.get_subsong());
-	else
-	  *length_in_ms = my_player.get_length(my_file,DFL_SUBSONG);
+      *length_in_ms = my_player.get_length(my_file,(file ? my_player.get_subsong() : DFL_SUBSONG));
 
       delete p;
     }
 }
 
-int wa2_Play(char *fn)
+int wa2_Play(const in_char *file)
 {
+  read_config();
+
+  AutoCharFn fn(file);
   return my_player.play(fn);
 }
 
-void wa2_Pause()
+void wa2_Pause(void)
 {
   my_player.pause();
 }
 
-void wa2_UnPause()
+void wa2_UnPause(void)
 {
   my_player.unpause();
 }
 
-int wa2_IsPaused()
+int wa2_IsPaused(void)
 {
   return my_player.is_paused();
 }
 
-void wa2_Stop()
+void wa2_Stop(void)
 {
   my_player.stop();
 }
 
-int wa2_GetLength()
+int wa2_GetLength(void)
 {
   return my_player.get_length();
 }
 
-int wa2_GetOutputTime()
+int wa2_GetOutputTime(void)
 {
   return my_player.get_position();
 }
@@ -187,29 +270,87 @@ void wa2_SetPan(int pan)
   my_player.set_panning(pan);
 }
 
-void wa2_EqSet(int on, char data[10], int preamp)
+/*void wa2_EqSet(int on, char data[10], int preamp)
 {
   return;
-}
+}*/
 
-void wa2_DlgAbout(HWND hwndParent)
+void wa2_About(HWND hwndParent)
 {
-  dlg_about.open(hwndParent);
+  // TODO localise
+  wchar_t message[2048] = { 0 };
+  StringCchPrintf(message, ARRAYSIZE(message), L"%s\n\nCopyright © Simon Peter (1999-2010)"
+                  L"\nCopyright © Nikita V. Kalaganov (2002)\nCopyright © Wraithverge (2010)"
+                  L"\nCopyright © Stas'M (2016-2017)\n\n\nParts of the plug-in & AdPlug "
+                  L"library originally\nfrom https://adplug.github.io (as per the LGPL)\n\n"
+                  L"WACUP modifications by Darren Owen aka DrO (%s)\n\nBuild date: %s",
+                  (LPCWSTR)plugin.description, L"2022", TEXT(__DATE__));
+  AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
 }
 
 void wa2_DlgConfig(HWND hwndParent)
 {
-  dlg_config.open(hwndParent);
+  OpenPrefsPage((WPARAM)(preferences ? preferences->_id : -1));
 }
 
-int wa2_DlgInfo(char *file, HWND hwndParent)
+int wa2_DlgInfo(const in_char *file, HWND hwndParent)
 {
-  return dlg_info.open(file,hwndParent);
+  AutoCharFn fn(file);
+  return dlg_info.open(fn, hwndParent);
 }
 
-extern "C" __declspec(dllexport) bool winampGetExtendedFileInfo(char *file, char *meta, char *ret, int retlen)
+// return 1 if you want winamp to show it's own file info dialogue, 0 if you want to show your own (via In_Module.InfoBox)
+// if returning 1, remember to implement winampGetExtendedFileInfo("formatinformation")!
+extern "C" __declspec(dllexport) int winampUseUnifiedFileInfoDlg(const wchar_t* fn)
+{
+    // TODO
+    return 0;
+}
+
+// should return a child window of 513x271 pixels (341x164 in msvc dlg units), or return NULL for no tab.
+// Fill in name (a buffer of namelen characters), this is the title of the tab (defaults to "Advanced").
+// filename will be valid for the life of your window. n is the tab number. This function will first be 
+// called with n == 0, then n == 1 and so on until you return NULL (so you can add as many tabs as you like).
+// The window you return will recieve WM_COMMAND, IDOK/IDCANCEL messages when the user clicks OK or Cancel.
+// when the user edits a field which is duplicated in another pane, do a SendMessage(GetParent(hwnd),WM_USER,(WPARAM)L"fieldname",(LPARAM)L"newvalue");
+// this will be broadcast to all panes (including yours) as a WM_USER.
+extern "C" __declspec(dllexport) HWND winampAddUnifiedFileInfoPane(int n, const wchar_t* filename, HWND parent, wchar_t* name, size_t namelen)
+{
+    return NULL;
+}
+
+extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *file, char * metadata, wchar_t *ret, const size_t retlen)
 {
   if (ret == NULL || !retlen) return false;
+
+  read_config();
+
+  AutoCharFn fn(file);
+
+  if (SameStrA(metadata, "type") ||
+      SameStrA(metadata, "streammetadata"))
+  {
+    ret[0] = '0';
+    ret[1] = 0;
+    return true;
+  }
+  else if (SameStrA(metadata, "streamgenre") ||
+           SameStrA(metadata, "streamtype") ||
+           SameStrA(metadata, "streamurl") ||
+           SameStrA(metadata, "streamname"))
+  {
+    return false;
+  }
+  else if (SameStrA(metadata, "family"))
+  {
+    const int index = filetypes.grata(file);
+    if (index != -1)
+    {
+      wcsncpy(ret, filetypes.get_name(index), retlen);
+      return true;
+    }
+    return false;
+  }
 
   const char *my_file;
 
@@ -219,10 +360,10 @@ extern "C" __declspec(dllexport) bool winampGetExtendedFileInfo(char *file, char
   else
   {
     // our file ?
-    if (!wa2_IsOurFile(file))
-      return false;
+    /*if (!wa2_IsOurFile(file))
+      return false;*/
 
-    my_file = file;
+    my_file = fn;
   }
 
   CSilentopl silent;
@@ -234,44 +375,39 @@ extern "C" __declspec(dllexport) bool winampGetExtendedFileInfo(char *file, char
   *ret = L'\0';
   bool result = false;
 
-  if (!stricmp(meta, "title"))
+  if (SameStrA(metadata, "title"))
   {
     result = !p->gettitle().empty() && ((int)p->gettitle().length() < retlen);
     if (result)
-      strcpy(ret, p->gettitle().c_str());
+      wcsncpy(ret, AutoWide(p->gettitle().c_str()), retlen);
   }
-  else if (!stricmp(meta, "artist"))
+  else if (SameStrA(metadata, "artist"))
   {
     result = !p->getauthor().empty() && ((int)p->getauthor().length() < retlen);
     if (result)
-      strcpy(ret, p->getauthor().c_str());
+      wcsncpy(ret, AutoWide(p->getauthor().c_str()), retlen);
   }
-  else if (!stricmp(meta, "comment"))
+  else if (SameStrA(metadata, "comment"))
   {
     result = !p->getdesc().empty() && ((int)p->getdesc().length() < retlen);
     if (result)
-      strcpy(ret, p->getdesc().c_str());
+      wcsncpy(ret, AutoWide(p->getdesc().c_str()), retlen);
   }
-  else if (!stricmp(meta, "family") || !stricmp(meta, "genre"))
+  else if (SameStrA(metadata, "formatinformation"))
   {
     result = !p->gettype().empty() && ((int)p->gettype().length() < retlen);
     if (result)
-      strcpy(ret, p->gettype().c_str());
+      wcsncpy(ret, AutoWide(p->gettype().c_str()), retlen);
   }
-  else if (!stricmp(meta, "length"))
+  else if (SameStrA(metadata, "length"))
   {
-    int length_in_ms;
+    /*int length_in_ms;
     if (file)
       length_in_ms = my_player.get_length(my_file, my_player.get_subsong());
     else
       length_in_ms = my_player.get_length(my_file, DFL_SUBSONG);
-    sprintf(ret, "%d", length_in_ms);
-    result = true;
-  }
-  else if (!stricmp(meta, "type"))
-  {
-    ret[0] = '0'; // Audio
-    ret[1] = 0;
+    sprintf(ret, "%d", length_in_ms);*/
+    I2WStr(my_player.get_length(my_file, (file ? my_player.get_subsong() : DFL_SUBSONG)), ret, retlen);
     result = true;
   }
 
@@ -279,22 +415,97 @@ extern "C" __declspec(dllexport) bool winampGetExtendedFileInfo(char *file, char
   return result;
 }
 
-In_Module mod =
+void SetFileExtensions(const wchar_t* ignore_list)
   {
-    IN_VER,
-    PLUGIN_VER,
+  filetypes.set_ignore_list(ignore_list);
+
+  if (plugin.FileExtensions)
+  {
+    plugin.memmgr->sysFree(plugin.FileExtensions);
+  }
+  plugin.FileExtensions = (char*)filetypes.export_filetypes((wchar_t*)plugin.memmgr->sysMalloc(4096 * sizeof(wchar_t)));
+}
+
+void __cdecl GetFileExtensions(void)
+{
+    EnterCriticalSection(&g_ft_cs);
+
+    static bool loaded_extensions;
+    if (!loaded_extensions)
+    {
+        // TODO localise
+        filetypes.add(L"a2m", L"Adlib Tracker 2 Modules (*.A2M)");
+        filetypes.add(L"adl", L"Westwood ADL Files (*.ADL)");
+        filetypes.add(L"amd", L"AMUSIC Modules (*.AMD)");
+        filetypes.add(L"bam", L"Bob's Adlib Music Files (*.BAM)");
+        filetypes.add(L"bmf", L"Easy AdLib 1.0 by The Brain (*.BMF)");
+        filetypes.add(L"cff", L"BoomTracker 4 Modules (*.CFF)");
+        filetypes.add(L"cmf", L"Creative Adlib Music Files (*.CMF)");
+        //filetypes.add(L"cmf", L"SoundFX Macs Opera (*.CMF)");
+        filetypes.add(L"d00", L"Packed EdLib Modules (*.D00)");
+        filetypes.add(L"dfm", L"Digital-FM Modules (*.DFM)");
+        filetypes.add(L"dmo", L"TwinTeam Modules (*.DMO)");
+        //filetypes.add(L"dro", L"DOSBox Raw OPL v1.0 and v2.0 Files (*.DRO)");
+        filetypes.add(L"dtm", L"DeFy Adlib Tracker Modules (*.DTM)");
+        filetypes.add(L"got", L"God of Thunder Music (*.GOT)");
+        filetypes.add(L"hsc", L"HSC-Tracker Modules (*.HSC)");
+        filetypes.add(L"hsp", L"Packed HSC-Tracker Modules (*.HSP)");
+        filetypes.add(L"hsq;sqx;sdb;agd;ha2", L"HERAD System (*.HSQ;*.SQX;*.SDB;*.AGD;*.HA2)");
+        filetypes.add(L"imf;wlf;adlib", L"Apogee IMF Files (*.IMF;*.WLF;*.ADLIB)");
+        filetypes.add(L"ims", L"IMPlay Song Files (*.IMS)");
+        filetypes.add(L"jbm", L"JBM Adlib Music Files (*.JBM)");
+        filetypes.add(L"ksm", L"Ken Silverman's Music Files (*.KSM)");
+        filetypes.add(L"laa", L"LucasArts Adlib Audio Files (*.LAA)");
+        filetypes.add(L"lds", L"LOUDNESS Sound System Files (*.LDS)");
+        filetypes.add(L"m", L"Ultima 6 Music Files (*.M)");
+        filetypes.add(L"mad", L"Mlat Adlib Tracker Modules (*.MAD)");
+        filetypes.add(L"mdi", L"AdLib MIDIPlay Files (*.MDI)");
+        filetypes.add(L"mid;kar", L"MIDI Audio Files (*.MID;*.KAR)");
+        filetypes.add(L"mkj", L"MKJamz Audio Files (*.MKJ)");
+        filetypes.add(L"msc", L"AdLib MSCplay (*.MSC)");
+        filetypes.add(L"mtk", L"MPU-401 Trakker Modules (*.MTK)");
+        filetypes.add(L"mus", L"AdLib MIDI Music Files (*.MUS)");
+        filetypes.add(L"rad", L"Reality Adlib Tracker Modules (*.RAD)");
+        filetypes.add(L"rac;raw", L"Raw AdLib Capture Files (*.RAC;*.RAW)");
+        filetypes.add(L"rix", L"Softstar RIX OPL Music Files (*.RIX)");
+        filetypes.add(L"rol", L"Adlib Visual Composer Modules (*.ROL)");
+        filetypes.add(L"sa2", L"Surprise! Adlib Tracker 2 Modules (*.SA2)");
+        filetypes.add(L"sat", L"Surprise! Adlib Tracker Modules (*.SAT)");
+        filetypes.add(L"sci", L"Sierra Adlib Audio Files (*.SCI)");
+        filetypes.add(L"sng", L"Adlib Tracker 1.0 Modules (*.SNG)");
+        /*filetypes.add(L"sng", L"Faust Music Creator Modules (*.SNG)");
+        filetypes.add(L"sng", L"SNGPlay Files (*.SNG)");*/
+        filetypes.add(L"sop", L"Note Sequencer by sopepos (*.SOP)");
+        //filetypes.add(L"vgm", L"Video Game Music (*.VGM)");
+        filetypes.add(L"xad", L"eXotic Adlib Files (*.XAD)");
+        filetypes.add(L"xms", L"XMS-Tracker Modules (*.XMS)");
+        filetypes.add(L"xsm", L"eXtra Simple Music Files (*.XSM)");
+
+        SetFileExtensions(config.get_ignored());
+
+        loaded_extensions = true;
+    }
+
+    LeaveCriticalSection(&g_ft_cs);
+}
+
+In_Module plugin =
+  {
+    IN_VER_WACUP,
+    //(char*)PLUGIN_VER,
+    (char*)"wacup(in_addanotherplug.dll)",
+    0,	// hMainWindow
+    0,	// hDllInstance
     0,
-    0,
-    0,
-    1,
-    1,
+    1,	// is_seekable
+    1,	// uses output
     wa2_DlgConfig,
-    wa2_DlgAbout,
+    wa2_About,
     wa2_Init,
     wa2_Quit,
     wa2_GetFileInfo,
     wa2_DlgInfo,
-    wa2_IsOurFile,
+    NULL/*/wa2_IsOurFile/**/,
     wa2_Play,
     wa2_Pause,
     wa2_UnPause,
@@ -305,78 +516,76 @@ In_Module mod =
     wa2_SetOutputTime,
     wa2_SetVolume,
     wa2_SetPan,
-    0,0,0,0,0,0,0,0,0,
-    0,0,
-    wa2_EqSet,
-    0,
-    0
+    0,0,0,0,0,0,0,0,0, // vis stuff
+    0,0,	// dsp
+    NULL,
+    NULL,	// setinfo
+    0,		// out_mod,
+    NULL,	// api_service
+    INPUT_HAS_READ_META | //INPUT_USES_UNIFIED_ALT3 |
+    INPUT_HAS_FORMAT_CONVERSION_UNICODE/* |
+    INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE*/,
+    GetFileExtensions,	// loading optimisation
+    IN_INIT_WACUP_END_STRUCT
   };
 
 extern "C" __declspec(dllexport) In_Module *winampGetInModule2()
 {
-  t_config_data	cfg;
+  return &plugin;
+}
 
-#ifdef DEBUG
-  debug_init();
-#endif
-  config.load();
-  config.get(&cfg);
+extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, HWND hwndDlg, int param)
+{
+    // prompt to remove our settings with default as no (just incase)
+    /*if (MessageBox( hwndDlg, WASABI_API_LNGSTRINGW( IDS_UNINSTALL_SETTINGS_PROMPT ),
+                    pluginTitle, MB_YESNO | MB_DEFBUTTON2 ) == IDYES ) {
+        SaveNativeIniString(PLUGIN_INI, _T("APE Plugin Settings"), 0, 0);
+    }*/
 
-  mod.UsesOutputPlug = config.useoutputplug;
+    // as we're not hooking anything and have no settings we can support an on-the-fly uninstall action
+    return IN_PLUGIN_UNINSTALL_NOW;
+}
 
-  filetypes.add("a2m", "Adlib Tracker 2 Modules (*.A2M)");
-  filetypes.add("adl", "Westwood ADL Files (*.ADL)");
-  filetypes.add("amd", "AMUSIC Modules (*.AMD)");
-  filetypes.add("bam", "Bob's Adlib Music Files (*.BAM)");
-  filetypes.add("bmf", "Easy AdLib 1.0 by The Brain (*.BMF)");
-  filetypes.add("cff", "BoomTracker 4 Modules (*.CFF)");
-  filetypes.add("cmf", "Creative Adlib Music Files (*.CMF)");
-  filetypes.add("cmf", "SoundFX Macs Opera (*.CMF)");
-  filetypes.add("d00", "Packed EdLib Modules (*.D00)");
-  filetypes.add("dfm", "Digital-FM Modules (*.DFM)");
-  filetypes.add("dmo", "TwinTeam Modules (*.DMO)");
-  filetypes.add("dro", "DOSBox Raw OPL v1.0 and v2.0 Files (*.DRO)");
-  filetypes.add("dtm", "DeFy Adlib Tracker Modules (*.DTM)");
-  filetypes.add("got", "God of Thunder Music (*.GOT)");
-  filetypes.add("hsc", "HSC-Tracker Modules (*.HSC)");
-  filetypes.add("hsp", "Packed HSC-Tracker Modules (*.HSP)");
-  filetypes.add("hsq;sqx;sdb;agd;ha2", "HERAD System (*.HSQ;*.SQX;*.SDB;*.AGD;*.HA2)");
-  filetypes.add("imf;wlf;adlib", "Apogee IMF Files (*.IMF;*.WLF;*.ADLIB)");
-  filetypes.add("ims", "IMPlay Song Files (*.IMS)");
-  filetypes.add("jbm", "JBM Adlib Music Files (*.JBM)");
-  filetypes.add("ksm", "Ken Silverman's Music Files (*.KSM)");
-  filetypes.add("laa", "LucasArts Adlib Audio Files (*.LAA)");
-  filetypes.add("lds", "LOUDNESS Sound System Files (*.LDS)");
-  filetypes.add("m", "Ultima 6 Music Files (*.M)");
-  filetypes.add("mad", "Mlat Adlib Tracker Modules (*.MAD)");
-  filetypes.add("mdi", "AdLib MIDIPlay Files (*.MDI)");
-  filetypes.add("mid;kar", "MIDI Audio Files (*.MID;*.KAR)");
-  filetypes.add("mkj", "MKJamz Audio Files (*.MKJ)");
-  filetypes.add("msc", "AdLib MSCplay (*.MSC)");
-  filetypes.add("mtk", "MPU-401 Trakker Modules (*.MTK)");
-  filetypes.add("mus", "AdLib MIDI Music Files (*.MUS)");
-  filetypes.add("rad", "Reality Adlib Tracker Modules (*.RAD)");
-  filetypes.add("rac;raw", "Raw AdLib Capture Files (*.RAC;*.RAW)");
-  filetypes.add("rix", "Softstar RIX OPL Music Files (*.RIX)");
-  filetypes.add("rol", "Adlib Visual Composer Modules (*.ROL)");
-  if(!cfg.s3m_workaround) {
-    filetypes.add("s3m", "Scream Tracker 3 Modules (*.S3M)");
+////////////////////////////////////////////////////////////////////////////////
+
+extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_openW(const wchar_t* file, int* size, int* bps, int* nch, int* srate)
+{
+  MyPlayer* decoder = new MyPlayer();
+  if (decoder)
+  {
+    AutoCharFn fn(file);
+    if (decoder->open(fn, bps, nch, srate))
+    {
+      *size = -1; // TODO need to get number of samples, etc
+      return (intptr_t)decoder;
+    }
+    delete decoder;
   }
-  filetypes.add("sa2", "Surprise! Adlib Tracker 2 Modules (*.SA2)");
-  filetypes.add("sat", "Surprise! Adlib Tracker Modules (*.SAT)");
-  filetypes.add("sci", "Sierra Adlib Audio Files (*.SCI)");
-  filetypes.add("sng", "Adlib Tracker 1.0 Modules (*.SNG)");
-  filetypes.add("sng", "Faust Music Creator Modules (*.SNG)");
-  filetypes.add("sng", "SNGPlay Files (*.SNG)");
-  filetypes.add("sop", "Note Sequencer by sopepos (*.SOP)");
-  filetypes.add("vgm", "Video Game Music (*.VGM)");
-  filetypes.add("xad", "eXotic Adlib Files (*.XAD)");
-  filetypes.add("xms", "XMS-Tracker Modules (*.XMS)");
-  filetypes.add("xsm", "eXtra Simple Music Files (*.XSM)");
+  return NULL;
+}
 
-  filetypes.set_ignore_list(config.get_ignored());
+extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_getData(intptr_t handle, char* dest,
+                                                                        size_t len, int* killswitch)
+{
+  MyPlayer* decoder = (MyPlayer*)handle;
+  return (decoder ? decoder->decode(dest, len) : 0);
+}
 
-  mod.FileExtensions = filetypes.export_filetypes((char *)malloc(4096));
+extern "C" __declspec(dllexport) int winampGetExtendedRead_setTime(intptr_t handle, int millisecs)
+{
+  /*MyPlayer* decoder = (MyPlayer*)handle;
+  if (decoder)
+  {
+  }*/
+  return 0;
+}
 
-  return &mod;
+extern "C" __declspec(dllexport) void winampGetExtendedRead_close(intptr_t handle)
+{
+  MyPlayer* decoder = (MyPlayer*)handle;
+  if (decoder)
+  {
+    decoder->close();
+    delete decoder;
+}
 }

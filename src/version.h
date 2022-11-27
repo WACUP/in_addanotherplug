@@ -1,8 +1,8 @@
 // This file exists for compilation in Visual Studio only.  It is overwritten
 // by autoconf and Appveyor, using version.h.in as the template.
 
-#include <adplug/version.h>
+#include "../adplug/src/version.h"
 
-#define PLUGIN_VERSION "git"
+#define PLUGIN_VERSION ADPLUG_VERSION ".2"
 
-#define PLUGIN_VER "AdPlug/Winamp v" ADPLUG_VERSION "/v" PLUGIN_VERSION
+#define PLUGIN_VER "AdPlug v" ADPLUG_VERSION "/v" PLUGIN_VERSION

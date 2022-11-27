@@ -21,30 +21,30 @@ class FileTypes
 {
  public:
 
-  void		add(const char *type, const char *name, bool ignore = false);
+  void		add(const wchar_t *type, const wchar_t *name, bool _ignore = false);
 
-  char *	export_filetypes(char *buf);
+  wchar_t *	export_filetypes(wchar_t *buf);
 
-  bool		grata(const char *fname);
+  int		grata(const wchar_t *fname) const;
 
-  int		get_size();
+  int		get_size() const;
 
-  bool		get_ignore(int i);
+  bool		get_ignore(int i) const;
   void		set_ignore(int i, bool val);
 
-  const char *	get_ignore_list();
-  void		set_ignore_list(const char *ignore_list);
+  const wchar_t *	get_ignore_list(void);
+  void		set_ignore_list(const wchar_t *ignore_list);
 
-  const char *	get_name(int i);
+  const wchar_t *	get_name(int i);
 
  private:
 
   struct t_filetype_data
   {
-    vector<string>	type;
-    vector<string>	name;
+    vector<wstring>	type;
+    vector<wstring>	name;
     vector<bool>	ignore;
   } work;
 
-  string	xstrlist;
+  wstring	xstrlist;
 };

@@ -18,25 +18,27 @@
 */
 
 #include "plugin.h"
+#define WA_UTILS_SIMPLE
+#include <../../loader/loader/utils.h>
 
-void FileTypes::add(const char *type, const char *name, bool ignore)
+void FileTypes::add(const wchar_t *type, const wchar_t *name, bool _ignore)
 {
   work.type.push_back(type);
   work.name.push_back(name);
-  work.ignore.push_back(ignore);
+  work.ignore.push_back(_ignore);
 }
 
-char *FileTypes::export_filetypes(char *buf)
+wchar_t *FileTypes::export_filetypes(wchar_t *buf)
 {
-  char *retval = buf;
-
-  for (int i=0;i<get_size();i++)
+  wchar_t *retval = buf;
+  const int count = get_size();
+  for (int i=0;i<count;i++)
     if(!work.ignore[i]) {
-      memcpy(buf,work.type[i].c_str(),work.type[i].length());
+      memcpy(buf, work.type[i].c_str(),work.type[i].length()*2);
       buf += work.type[i].length();
       *buf++ = 0;
 
-      memcpy(buf,work.name[i].c_str(),work.name[i].length());
+      memcpy(buf,work.name[i].c_str(),work.name[i].length()*2);
       buf += work.name[i].length();
       *buf++ = 0;
     }
@@ -46,17 +48,17 @@ char *FileTypes::export_filetypes(char *buf)
   return retval;
 }
 
-int FileTypes::get_size()
+int FileTypes::get_size() const
 {
   return work.type.size();
 }
 
-const char *FileTypes::get_name(int i)
+const wchar_t *FileTypes::get_name(int i)
 {
   return work.name[i].c_str();
 }
 
-bool FileTypes::get_ignore(int i)
+bool FileTypes::get_ignore(int i) const
 {
   return work.ignore[i];
 }
@@ -66,89 +68,93 @@ void FileTypes::set_ignore(int i, bool val)
   work.ignore[i] = val;
 }
 
-bool FileTypes::grata(const char *fname)
+int FileTypes::grata(const wchar_t *fname) const
 {
-  const char *tmpstr = strrchr(fname,'.');
+  const wchar_t *tmpstr = wcsrchr(fname,L'.');
   if (!tmpstr)
-    return true;
+    return -1;
 
-  char *p = (char *)malloc(strlen(++tmpstr)+1);
+  wchar_t* p = (wchar_t*)calloc(wcslen(++tmpstr) + 1, sizeof(wchar_t));
   if (!p)
-    return true;
+    return -1;
 
-  strcpy(p,tmpstr);
+  wcscpy(p,tmpstr);
 
-  for (int i=0;i<get_size();i++)
+  const int count = get_size();
+  for (int i=0;i<count;i++)
     {
-      if (!work.ignore[i])
+    if (work.ignore[i])
 	continue;
 
-      string tmpxstr = work.type[i];
+    wstring tmpxstr = work.type[i];
 
-      const char *ext = tmpxstr.c_str();
-      const char *str = strstr(ext,_strlwr(p));
+    const wchar_t *ext = tmpxstr.c_str();
+    /*const char *str = wcsstr(ext,_wcslwr(p));/*/
+    const wchar_t*str = wcsistr(ext,p);/**/
 
       if (str)
 	{
 	  // for "aaa;bbb;ccc" and "ccc"
-	  if (strlen(p) == strlen(str))
+	  if (wcslen(p) == wcslen(str))
 	    {
 	      free(p);
-	      return false;
+	    return i;
 	    }
 
-	  if (str[strlen(p)] == ';')
+	  if (str[wcslen(p)] == L';')
 	    {
 	      // for "aaa;bbb;ccc" and "aaa"
 	      if (ext == str)
 		{
 		  free(p);
-		  return false;
+		  return i;
 		}
 
 	      // for "aaa;bbb;ccc" and "bbb"
-	      if (ext[str-ext-1] == ';')
+	    if (ext[str-ext-1] == L';')
 		{
 		  free(p);
-		  return false;
+		  return i;
 		}
 	    }
 	}
     }
 
   free(p);
-  return true;
+  return -1;
 }
 
-void FileTypes::set_ignore_list(const char *ignore_list)
+void FileTypes::set_ignore_list(const wchar_t *ignore_list)
 {
-  char *str,*spos;
-  str = spos = (char *)ignore_list;
+  wchar_t *str,*spos;
+  str = spos = (wchar_t *)ignore_list;
 
   while (*str)
     {
-      while (*spos != ';')
+    while (*spos != L';')
 	spos++;
       *spos = 0;
 
-      int ipos = atoi(str);
+    int ipos = WStr2I(str);
       if (ipos < get_size())
 	work.ignore[ipos] = true;
 
-      *spos++ = ';';
+    *spos++ = L';';
       str = spos;
     }
 }
 
-const char *FileTypes::get_ignore_list()
+const wchar_t *FileTypes::get_ignore_list(void)
 {
-  char tmpstr[11];
+  wchar_t tmpstr[11] = {0};
+
+  xstrlist.clear();
 
   for (int i=0;i<get_size();i++)
     if (work.ignore[i])
       {
-	xstrlist.append(_itoa(i,tmpstr,10));
-	xstrlist.append(";");
+		xstrlist.append(I2WStr(i, tmpstr, ARRAYSIZE(tmpstr)));
+	    xstrlist.append(L";");
       }
 
   return xstrlist.c_str();
