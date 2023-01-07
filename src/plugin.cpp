@@ -26,6 +26,8 @@
 #include <../../sdk/nu/autocharfn.h>
 #include <../../sdk/nu/autowide.h>
 
+#include <../../wacup_version.h>
+
 #ifdef DEBUG
 #	include "debug.h"
 #endif
@@ -183,7 +185,13 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 
   // set default info
   if (title)
-    wcscpy(title, AutoWide(strrchr(my_file, '\\') + 1));
+  {
+    const char* fn = strrchr(my_file, '\\');
+    if (fn && *fn)
+    {
+      wcsncpy(title, AutoWide(fn + 1), GETFILEINFO_TITLE_LENGTH);
+    }
+  }
 
   if (length_in_ms)
     *length_in_ms = 0;
@@ -279,12 +287,15 @@ void wa2_About(HWND hwndParent)
 {
   // TODO localise
   wchar_t message[2048] = { 0 };
-  StringCchPrintf(message, ARRAYSIZE(message), L"%s\n\nCopyright © Simon Peter (1999-2010)"
-                  L"\nCopyright © Nikita V. Kalaganov (2002)\nCopyright © Wraithverge (2010)"
-                  L"\nCopyright © Stas'M (2016-2017)\n\n\nParts of the plug-in & AdPlug "
-                  L"library originally\nfrom https://adplug.github.io (as per the LGPL)\n\n"
-                  L"WACUP modifications by Darren Owen aka DrO (%s)\n\nBuild date: %s",
-                  (LPCWSTR)plugin.description, L"2022", TEXT(__DATE__));
+  StringCchPrintf(message, ARRAYSIZE(message), L"%s (%s)\n\nCopyright "
+                  L"© Simon Peter (1999-2010)\nCopyright © Nikita V. "
+                  L"Kalaganov (2002)\nCopyright © Wraithverge (2010)\n"
+                  L"Copyright © Stas'M (2016-2017)\n\n\nParts of the "
+                  L"plug-in & AdPlug library originally\nfrom https://"
+                  L"adplug.github.io(as per the LGPL)\n\nWACUP "
+                  L"modifications by Darren Owen aka DrO (%s)\n\nBuild "
+                  L"date: %s", (LPCWSTR)plugin.description, L"beta483",
+                  L"2022-" WACUP_COPYRIGHT, TEXT(__DATE__));
   AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
 }
 
@@ -435,7 +446,8 @@ void __cdecl GetFileExtensions(void)
     {
         // TODO localise
         filetypes.add(L"a2m", L"Adlib Tracker 2 Modules (*.A2M)");
-        filetypes.add(L"adl", L"Westwood ADL Files (*.ADL)");
+        filetypes.add(L"adl", L"Coktel Vision ADL Files (*.ADL)");
+        //filetypes.add(L"adl", L"Westwood ADL Files (*.ADL)");
         filetypes.add(L"amd", L"AMUSIC Modules (*.AMD)");
         filetypes.add(L"bam", L"Bob's Adlib Music Files (*.BAM)");
         filetypes.add(L"bmf", L"Easy AdLib 1.0 by The Brain (*.BMF)");
@@ -464,7 +476,7 @@ void __cdecl GetFileExtensions(void)
         filetypes.add(L"mkj", L"MKJamz Audio Files (*.MKJ)");
         filetypes.add(L"msc", L"AdLib MSCplay (*.MSC)");
         filetypes.add(L"mtk", L"MPU-401 Trakker Modules (*.MTK)");
-        filetypes.add(L"mus", L"AdLib MIDI Music Files (*.MUS)");
+        filetypes.add(L"mus;mdy", L"AdLib MIDI Music Files (*.MUS;*.MDY)");
         filetypes.add(L"rad", L"Reality Adlib Tracker Modules (*.RAD)");
         filetypes.add(L"rac;raw", L"Raw AdLib Capture Files (*.RAC;*.RAW)");
         filetypes.add(L"rix", L"Softstar RIX OPL Music Files (*.RIX)");

@@ -100,10 +100,10 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
       tci.mask = TCIF_TEXT;
 
       // TODO localise
-      tci.pszText = TEXT("Output");
+      tci.pszText = TEXT("Playback Options");
       SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,0,(LPARAM)&tci);
 		
-      tci.pszText = TEXT("Formats");
+      tci.pszText = TEXT("Supported Formats");
       SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,1,(LPARAM)&tci);
 		
       // display new tab window
@@ -446,6 +446,12 @@ BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM
       tooltip->add(GetDlgItem(hwndDlg,IDC_FTSELALL),  "ftselall",  "Select all formats.");
       tooltip->add(GetDlgItem(hwndDlg,IDC_FTDESELALL),  "ftdeselall",  "Deselect all formats.");
 #endif
+
+      // need to make sure that we've got a list
+      // of file types loaded which may not have
+      // yet happened if nothing has played, etc
+      extern void __cdecl GetFileExtensions(void);
+      GetFileExtensions();
 
       // fill listbox
       for (i=0;i<filetypes.get_size();i++)
