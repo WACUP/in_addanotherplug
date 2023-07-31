@@ -79,7 +79,8 @@ void Config::load(void)
     CreateDirectoryA(fname.c_str(), NULL);
   fname.append("\\winamp.ini");*/
 
-  const wchar_t *fname = GetPaths()->winamp_ini_file;
+  const winamp_paths *paths = GetPaths();
+  const wchar_t *fname = paths->winamp_ini_file;
 
   // load configuration from .ini file
   int bufval;
@@ -108,7 +109,8 @@ void Config::load(void)
   if (bufval != -1)
     next.useoutput_alt = (enum t_output)bufval;
 
-  CombinePath(curdir, GetPaths()->settings_dir, L"");
+  LPCWSTR settings_dir = paths->settings_dir;
+  CombinePath(curdir, settings_dir, L"");
   /*strcpy(curdir, std::getenv("USERPROFILE"));
   if (curdir == "")
     strcpy(curdir, std::getenv("ALLUSERSPROFILE"));
@@ -144,7 +146,7 @@ void Config::load(void)
   // Build database default path (in winamp plugin directory)
   //GetModuleFileNameA(GetModuleHandleA("in_adlib"), dbfile, MAX_PATH);
   //strcpy(strrchr(dbfile, '\\') + 1, DFL_DBFILE);
-  CombinePath(dbfile, GetPaths()->settings_dir, DFL_DBFILE);
+  CombinePath(dbfile, settings_dir, DFL_DBFILE);
 
   GetPrivateProfileString(L"in_adlib",L"database",dbfile,bufstr,MAX_PATH,fname);
   next.db_file = bufstr;

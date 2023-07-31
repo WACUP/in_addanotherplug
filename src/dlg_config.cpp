@@ -123,7 +123,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
           UXThemeFunc((WPARAM)tab_hwnd);
 		  // make sure that we're creating the window before the tab control
 		  // otherwise the tab order can be a bit odd & skinned prefs fails!
-		  SetWindowPos(tab_hwnd, HWND_TOP, (r.left + 5), (r.top + 9),
+		  SetWindowPos(tab_hwnd, HWND_TOP, r.left, r.top,
 					   (r.right - r.left), (r.bottom - r.top),
 					   SWP_SHOWWINDOW | SWP_NOACTIVATE);
 		  SetWindowLongPtr(tab_hwnd, GWL_ID, 10000 + i);
@@ -155,6 +155,21 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
         }
       }
       return TRUE;
+	}
+    case (WM_APP + 374):
+	{
+	  RECT r = { 0 };
+	  HWND hTab = GetDlgItem(hwndDlg,IDC_TABBED_PREFS_TAB);
+	  GetClientRect(hTab, &r);
+	  TabCtrl_AdjustRect(hTab, 0, &r);
+
+      for (int i = 0; i < 2; i++)
+	  {
+	    SetWindowPos(GetDlgItem(hwndDlg, 10000 + i), NULL, r.left,
+                     r.top, (r.right - r.left), (r.bottom - r.top),
+					 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	  }
+	  break;
 	}
     case WM_DESTROY:
     {

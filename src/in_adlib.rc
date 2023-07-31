@@ -46,8 +46,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,3,4,5
- PRODUCTVERSION 2,3,4,5
+ FILEVERSION 2,3,4,7
+ PRODUCTVERSION 2,3,4,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -64,12 +64,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "WACUP"
             VALUE "FileDescription", "Input Plug-in"
-            VALUE "FileVersion", "2.3.4.5"
+            VALUE "FileVersion", "2.3.4.7"
             VALUE "InternalName", "in_addanotherplug.dll"
             VALUE "LegalCopyright", "Copyright © 1999-2023 Simon Peter, et al (https://adplug.github.io), WACUP related modifications by Darren Owen aka DrO (© 2022-2023)"
             VALUE "OriginalFilename", "in_addanotherplug.dll"
             VALUE "ProductName", "AdPlug (AdLib) Player"
-            VALUE "ProductVersion", "2.3.4.5"
+            VALUE "ProductVersion", "2.3.4.7"
         END
     END
     BLOCK "VarFileInfo"
@@ -114,7 +114,7 @@ IDD_CFG_FORMATS DIALOGEX 0, 0, 264, 326
 STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    LISTBOX         IDC_FORMATLIST,4,3,255,304,LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_FORMATLIST,4,3,260,304,LBS_MULTIPLESEL | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "&Select all",IDC_FTSELALL,6,312,101,14,BS_MULTILINE
     PUSHBUTTON      "&Deselect all",IDC_FTDESELALL,128,312,101,14,BS_MULTILINE
 END

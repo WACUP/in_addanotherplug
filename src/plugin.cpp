@@ -339,6 +339,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   AutoCharFn fn(file);
 
   if (SameStrA(metadata, "type") ||
+      SameStrA(metadata, "lossless") ||
       SameStrA(metadata, "streammetadata"))
   {
     ret[0] = '0';
