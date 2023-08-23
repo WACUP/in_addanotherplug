@@ -189,7 +189,8 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
     const char* fn = strrchr(my_file, '\\');
     if (fn && *fn)
     {
-      wcsncpy(title, AutoWide(fn + 1), GETFILEINFO_TITLE_LENGTH);
+      AutoWide fn8(fn + 1);
+      wcsncpy(title, fn8, GETFILEINFO_TITLE_LENGTH);
     }
   }
 
@@ -209,13 +210,18 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
         // Wraithverge: modified this code to show the "Author" + "Title"
         // in the "Song Title" window, instead of just "Title", but only
         // if both Tag-data exists.
+        AutoWide title8(p->gettitle().c_str());
         if (!p->getauthor().empty() && !p->gettitle().empty()) {
-          wcscpy(title, AutoWide(p->getauthor().c_str()));
+          AutoWide author8(p->getauthor().c_str());
+          StringCchPrintf(title, GETFILEINFO_TITLE_LENGTH, L"%s - %s", author8, title8);/*/
+          wcscpy(title, author8);
           wcscat(title, L" - ");
-          wcscat(title, AutoWide(p->gettitle().c_str()));
+          wcscat(title, title8);/**/
         }
         else if (!p->gettitle().empty())
-          wcscpy(title, AutoWide(p->gettitle().c_str()));
+        {
+          wcsncpy(title, title8, GETFILEINFO_TITLE_LENGTH);
+        }
       }
 
       if (length_in_ms)
@@ -391,25 +397,37 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   {
     result = !p->gettitle().empty() && ((int)p->gettitle().length() < retlen);
     if (result)
-      wcsncpy(ret, AutoWide(p->gettitle().c_str()), retlen);
+    {
+      AutoWide title8(p->gettitle().c_str());
+      wcsncpy(ret, title8, retlen);
+    }
   }
   else if (SameStrA(metadata, "artist"))
   {
     result = !p->getauthor().empty() && ((int)p->getauthor().length() < retlen);
     if (result)
-      wcsncpy(ret, AutoWide(p->getauthor().c_str()), retlen);
+    {
+      AutoWide author8(p->getauthor().c_str());
+      wcsncpy(ret, author8, retlen);
+    }
   }
   else if (SameStrA(metadata, "comment"))
   {
     result = !p->getdesc().empty() && ((int)p->getdesc().length() < retlen);
     if (result)
-      wcsncpy(ret, AutoWide(p->getdesc().c_str()), retlen);
+    {
+      AutoWide desc8(p->getdesc().c_str());
+      wcsncpy(ret, desc8, retlen);
+    }
   }
   else if (SameStrA(metadata, "formatinformation"))
   {
     result = !p->gettype().empty() && ((int)p->gettype().length() < retlen);
     if (result)
-      wcsncpy(ret, AutoWide(p->gettype().c_str()), retlen);
+    {
+      AutoWide type8(p->gettype().c_str());
+      wcsncpy(ret, type8, retlen);
+    }
   }
   else if (SameStrA(metadata, "length"))
   {

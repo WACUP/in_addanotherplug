@@ -175,8 +175,8 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
     {
       // make sure the child dialogs are closed
       // so any changes from them will be saved
-      DestroyWindow(GetDlgItem(hwndDlg, 10000));
-      DestroyWindow(GetDlgItem(hwndDlg, 10001));
+      DestroyControl(hwndDlg, 10000);
+      DestroyControl(hwndDlg, 10001);
 
       config.set(&next);
 
