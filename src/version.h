@@ -3,6 +3,6 @@
 
 #include "../adplug/src/version.h"
 
-#define PLUGIN_VERSION ADPLUG_VERSION ".8"
+#define PLUGIN_VERSION ADPLUG_VERSION ".9"
 
 #define PLUGIN_VER "AdPlug v" ADPLUG_VERSION "/v" PLUGIN_VERSION

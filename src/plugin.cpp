@@ -340,27 +340,26 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 {
   if (ret == NULL || !retlen) return false;
 
-  read_config();
-
-  AutoCharFn fn(file);
-
   if (SameStrA(metadata, "type") ||
       SameStrA(metadata, "lossless") ||
       SameStrA(metadata, "streammetadata"))
   {
-    ret[0] = '0';
-    ret[1] = 0;
+    ret[0] = L'0';
+    ret[1] = L'\0';
     return true;
   }
   else if (SameStrA(metadata, "streamgenre") ||
            SameStrA(metadata, "streamtype") ||
            SameStrA(metadata, "streamurl") ||
-           SameStrA(metadata, "streamname"))
+           SameStrA(metadata, "streamname") ||
+           SameStrA(metadata, "reset"))
   {
     return false;
   }
   else if (SameStrA(metadata, "family"))
   {
+    read_config();
+
     const int index = filetypes.grata(file);
     if (index != -1)
     {
@@ -370,6 +369,9 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     return false;
   }
 
+  read_config();
+
+  AutoCharFn fn(file);
   const char *my_file;
 
   // current file ?
