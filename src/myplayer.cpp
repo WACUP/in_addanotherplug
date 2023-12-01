@@ -409,7 +409,7 @@ bool MyPlayer::output_init()
     case emuks:
     case emuwo:
     case emunk:
-      maxlatency = plugin.outMod->Open(work.replayfreq,(work.stereo ? 2 : 1),(work.use16bit ? 16 : 8),-1,-1);
+      maxlatency = (plugin.outMod->Open ? plugin.outMod->Open(work.replayfreq,(work.stereo ? 2 : 1),(work.use16bit ? 16 : 8),-1,-1) : -1);
       if (maxlatency < 0)
 	return false;
       plugin.outMod->SetVolume(-666);
@@ -443,29 +443,22 @@ void MyPlayer::output_done()
 
 bool MyPlayer::thread_init()
 {
-  DWORD tmpdword;
-
   switch (work.useoutput)
     {
     case emuts:
     case emuks:
     case emuwo:
     case emunk:
-      thread.emuts = (HANDLE)CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)callback_emuts,(void *)this,CREATE_SUSPENDED,&tmpdword);
+      thread.emuts = StartThread(callback_emuts, this, static_cast<int>(plugin.config->
+                                            GetInt(playbackConfigGroupGUID, L"priority",
+                                                    THREAD_PRIORITY_HIGHEST)), 0, NULL);
       if (!thread.emuts)
 	return false;
-      //SetThreadPriority(thread.emuts,thread_priority[4/*/work.priority/**/]);
-	  SetThreadPriority(thread.emuts, (int)plugin.config->
-					    GetInt(playbackConfigGroupGUID,
-						L"priority", THREAD_PRIORITY_HIGHEST));
-	  ResumeThread(thread.emuts);
       break;
     case disk:
-      thread.disk = (HANDLE)CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)callback_disk,(void *)this,CREATE_SUSPENDED,&tmpdword);
+      thread.disk = StartThread(callback_disk, this, THREAD_PRIORITY_HIGHEST, 0, NULL);
       if (!thread.disk)
 	return false;
-      SetThreadPriority(thread.disk, THREAD_PRIORITY_HIGHEST/*/thread_priority[work.priority]*/);
-      ResumeThread(thread.disk);
       break;
     }
 

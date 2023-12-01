@@ -450,11 +450,13 @@ void SetFileExtensions(const wchar_t* ignore_list)
 
 void __cdecl GetFileExtensions(void)
 {
-    EnterCriticalSection(&g_ft_cs);
-
     static bool loaded_extensions;
     if (!loaded_extensions)
     {
+        loaded_extensions = true;
+
+        EnterCriticalSection(&g_ft_cs);
+
         // TODO localise
         filetypes.add(L"a2m", L"Adlib Tracker 2 Modules (*.A2M)");
         filetypes.add(L"adl", L"Coktel Vision ADL Files (*.ADL)");
@@ -506,10 +508,8 @@ void __cdecl GetFileExtensions(void)
 
         SetFileExtensions(config.get_ignored());
 
-        loaded_extensions = true;
-    }
-
     LeaveCriticalSection(&g_ft_cs);
+}
 }
 
 In_Module plugin =
@@ -560,8 +560,8 @@ extern "C" __declspec(dllexport) In_Module *winampGetInModule2()
 extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, HWND hwndDlg, int param)
 {
     // prompt to remove our settings with default as no (just incase)
-    /*if (MessageBox( hwndDlg, WASABI_API_LNGSTRINGW( IDS_UNINSTALL_SETTINGS_PROMPT ),
-                    pluginTitle, MB_YESNO | MB_DEFBUTTON2 ) == IDYES ) {
+    /*if (plugin.language->UninstallSettingsPrompt(reinterpret_cast<const wchar_t*>(plugin.description)))
+    {
         SaveNativeIniString(PLUGIN_INI, _T("APE Plugin Settings"), 0, 0);
     }*/
 
