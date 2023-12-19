@@ -293,7 +293,7 @@ void wa2_About(HWND hwndParent)
                   L"Copyright © Stas'M (2016-2017)\n\n\nParts of the "
                   L"plug-in & AdPlug library originally\nfrom https://"
                   L"adplug.github.io(as per the LGPL)\n\nWACUP "
-                  L"modifications by Darren Owen aka DrO (%s)\n\nBuild "
+                  L"modifications by " WACUP_AUTHOR_STRW L" (%s)\n\nBuild "
                   L"date: %s", (LPCWSTR)plugin.description, L"beta483",
                   L"2022-" WACUP_COPYRIGHT, TEXT(__DATE__));
   AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
@@ -541,7 +541,7 @@ In_Module plugin =
     wa2_SetPan,
     0,0,0,0,0,0,0,0,0, // vis stuff
     0,0,	// dsp
-    NULL,
+    IN_INIT_WACUP_EQSET_EMPTY
     NULL,	// setinfo
     0,		// out_mod,
     NULL,	// api_service

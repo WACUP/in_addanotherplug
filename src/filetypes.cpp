@@ -89,6 +89,20 @@ int FileTypes::grata(const wchar_t *fname) const
     wstring tmpxstr = work.type[i];
 
     const wchar_t *ext = tmpxstr.c_str();
+
+	// if we know there's no additional
+	// extensions then we just match it
+	// directly otherwise 'm' -> 'a2m'
+    if (!wcsstr(ext, L";"))
+    {
+      if (!wcsicmp(ext, p))
+      {
+        free(p);
+        return i;
+      }
+      continue;
+    }
+
     /*const char *str = wcsstr(ext,_wcslwr(p));/*/
     const wchar_t*str = wcsistr(ext,p);/**/
 
