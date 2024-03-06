@@ -34,20 +34,20 @@ extern In_Module plugin;
 #define MSGE_XMPLAY	"Hardware OPL2 output is not supported when this plugin is used within XMPlay. An emulator must be used for output, instead."
 #endif
 
-#define DFL_EMU			emunk
+#define DFL_EMU			    emunk
 #define DFL_REPLAYFREQ		49716
 #define DFL_HARMONIC		false
 #define DFL_USE16BIT		true
-#define DFL_STEREO		true
+#define DFL_STEREO		    true
 #define DFL_USEOUTPUT		DFL_EMU
 #define DFL_USEOUTPUT_ALT	emunone
 #define DFL_TESTLOOP		true
-#define DFL_SUBSEQ		true
+#define DFL_SUBSEQ		    true
 #define DFL_STDTIMER		true
 #define DFL_DISKDIR		    TEXT(".\\")
 #define DFL_IGNORED	    	TEXT("")
 #define DFL_DBFILE		    TEXT("adplug.db")
-#define DFL_USEDB		true
+#define DFL_USEDB		    true
 #define DFL_LASTPREFSTAB    false
 
 CAdPlugDatabase *Config::mydb = 0;
@@ -167,7 +167,7 @@ void WriteIniInt(const wchar_t* name, const int value, const int def_value)
   wchar_t bufstr[11] = { 0 };
   WritePrivateProfileString(L"in_adlib", name, ((value != def_value) ?
                             I2WStr(value, bufstr, ARRAYSIZE(bufstr)) :
-                                    NULL), GetPaths()->winamp_ini_file);
+                                  NULL), GetPaths()->winamp_ini_file);
 }
 
 void Config::save(void)

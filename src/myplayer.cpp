@@ -453,12 +453,12 @@ bool MyPlayer::thread_init()
                                             GetInt(playbackConfigGroupGUID, L"priority",
                                                     THREAD_PRIORITY_HIGHEST)), 0, NULL);
       if (!thread.emuts)
-	return false;
+	    return false;
       break;
     case disk:
       thread.disk = StartThread(callback_disk, this, THREAD_PRIORITY_HIGHEST, 0, NULL);
       if (!thread.disk)
-	return false;
+	    return false;
       break;
     }
 

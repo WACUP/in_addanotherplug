@@ -82,9 +82,9 @@ int FileTypes::grata(const wchar_t *fname) const
 
   const int count = get_size();
   for (int i=0;i<count;i++)
-    {
+  {
     if (work.ignore[i])
-	continue;
+	  continue;
 
     wstring tmpxstr = work.type[i];
 
@@ -104,35 +104,35 @@ int FileTypes::grata(const wchar_t *fname) const
     }
 
     /*const char *str = wcsstr(ext,_wcslwr(p));/*/
-    const wchar_t*str = wcsistr(ext,p);/**/
+	const wchar_t *str = wcsistr(ext,p);/**/
 
-      if (str)
+    if (str)
 	{
 	  // for "aaa;bbb;ccc" and "ccc"
 	  if (wcslen(p) == wcslen(str))
-	    {
-	      free(p);
+	  {
+	    free(p);
 	    return i;
-	    }
+	  }
 
 	  if (str[wcslen(p)] == L';')
-	    {
-	      // for "aaa;bbb;ccc" and "aaa"
-	      if (ext == str)
+	  {
+	    // for "aaa;bbb;ccc" and "aaa"
+	    if (ext == str)
 		{
 		  free(p);
 		  return i;
 		}
 
-	      // for "aaa;bbb;ccc" and "bbb"
+	    // for "aaa;bbb;ccc" and "bbb"
 	    if (ext[str-ext-1] == L';')
 		{
 		  free(p);
 		  return i;
 		}
-	    }
+	  }
 	}
-    }
+  }
 
   free(p);
   return -1;
@@ -144,18 +144,18 @@ void FileTypes::set_ignore_list(const wchar_t *ignore_list)
   str = spos = (wchar_t *)ignore_list;
 
   while (*str)
-    {
+  {
     while (*spos != L';')
-	spos++;
-      *spos = 0;
+	  spos++;
+    *spos = 0;
 
     int ipos = WStr2I(str);
-      if (ipos < get_size())
-	work.ignore[ipos] = true;
+    if (ipos < get_size())
+	  work.ignore[ipos] = true;
 
     *spos++ = L';';
-      str = spos;
-    }
+    str = spos;
+  }
 }
 
 const wchar_t *FileTypes::get_ignore_list(void)

@@ -46,8 +46,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,3,4,11
- PRODUCTVERSION 2,3,4,11
+ FILEVERSION 2,3,4,13
+ PRODUCTVERSION 2,3,4,13
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -64,12 +64,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "WACUP"
             VALUE "FileDescription", "Input Plug-in"
-            VALUE "FileVersion", "2.3.4.11"
+            VALUE "FileVersion", "2.3.4.13"
             VALUE "InternalName", "in_addanotherplug.dll"
             VALUE "LegalCopyright", "Copyright © 1999-2024 Simon Peter, et al (https://adplug.github.io), WACUP related modifications by Darren Owen aka DrO (© 2022-2024)"
             VALUE "OriginalFilename", "in_addanotherplug.dll"
             VALUE "ProductName", "AdPlug (AdLib) Player"
-            VALUE "ProductVersion", "2.3.4.11"
+            VALUE "ProductVersion", "2.3.4.13"
         END
     END
     BLOCK "VarFileInfo"
@@ -158,13 +158,13 @@ BEGIN
     CONTROL         "&Use Database",IDC_USEDB,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,10,264,62,10
     LTEXT           "Some formats can be played at different speeds but the files don't report the correct speed to use. The database is used to look up the correct playback speeds for known files.",IDC_STATIC,10,276,246,26
     PUSHBUTTON      "",IDC_DATABASE,10,304,249,15
-    END
+END
 
 IDD_FILEINFO DIALOGEX 0, 0, 310, 260
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "AdPlug :: File Info"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
-    BEGIN
+BEGIN
     RTEXT           "Title:",IDC_STATIC,11,7,27,12,SS_CENTERIMAGE
     RTEXT           "Author:",IDC_STATIC,11,21,27,12,SS_CENTERIMAGE
     LTEXT           " Static",IDC_TITLE,41,7,262,12,SS_CENTERIMAGE,WS_EX_CLIENTEDGE
@@ -195,7 +195,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x1
     LTEXT           "00",IDC_SUBSONGMIN,15,224,14,9
     RTEXT           "00",IDC_SUBSONGMAX,282,224,14,9
     CTEXT           "00",IDC_SUBSONG,144,221,22,12,SS_CENTERIMAGE,WS_EX_STATICEDGE
-    END
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -209,17 +209,17 @@ BEGIN
     IDD_CFG_FORMATS, DIALOG
     BEGIN
         BOTTOMMARGIN, 251
-END
+    END
 
     IDD_CFG_OUTPUT, DIALOG
-BEGIN
+    BEGIN
         RIGHTMARGIN, 226
         BOTTOMMARGIN, 298
-END
+    END
 
     IDD_FILEINFO, DIALOG
-BEGIN
-END
+    BEGIN
+    END
 END
 #endif    // APSTUDIO_INVOKED
 

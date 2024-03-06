@@ -105,7 +105,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
 		
       tci.pszText = TEXT("Supported Formats");
       SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,1,(LPARAM)&tci);
-		
+
       // display new tab window
       HWND hTab = GetDlgItem(hwndDlg,IDC_TABBED_PREFS_TAB);
 
@@ -147,7 +147,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
           {
             HWND tab_hwnd = GetDlgItem(hwndDlg, 10000 + i);
             if (IsWindow(tab_hwnd))
-	{
+            {
               const bool show_tab = (!!i == next.lastprefstab);
               ShowWindow(tab_hwnd, (show_tab ? SW_SHOWNA : SW_HIDE));
             }
@@ -155,7 +155,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
         }
       }
       return TRUE;
-	}
+    }
     case (WM_APP + 374):
 	{
 	  RECT r = { 0 };
@@ -188,8 +188,8 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
       SetFileExtensions(ignore_list);
     }
   }
-	  return FALSE;
-	}
+  return FALSE;
+}
 
 int CALLBACK APIENTRY BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData)
 {
@@ -210,7 +210,7 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
   int i;
 
   switch (message)
-    {
+  {
     case WM_INITDIALOG: {
       DarkModeSetup(hwndDlg);
 #if 0
@@ -273,16 +273,16 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
       else if (next.replayfreq == 49716)
         CheckRadioButton(hwndDlg,IDC_FREQ1,IDC_FREQC,IDC_FREQ5);
       else
-	{
-	  CheckRadioButton(hwndDlg,IDC_FREQ1,IDC_FREQC,IDC_FREQC);
-	  SetDlgItemInt(hwndDlg,IDC_FREQC_VALUE,next.replayfreq,FALSE);
-	}
+	  {
+	    CheckRadioButton(hwndDlg,IDC_FREQ1,IDC_FREQC,IDC_FREQC);
+	    SetDlgItemInt(hwndDlg,IDC_FREQC_VALUE,next.replayfreq,FALSE);
+	  }
 
       // set "resolution"
       if (next.use16bit)
-	CheckRadioButton(hwndDlg,IDC_QUALITY8,IDC_QUALITY16,IDC_QUALITY16);
+	    CheckRadioButton(hwndDlg,IDC_QUALITY8,IDC_QUALITY16,IDC_QUALITY16);
       else
-	CheckRadioButton(hwndDlg,IDC_QUALITY8,IDC_QUALITY16,IDC_QUALITY8);
+	    CheckRadioButton(hwndDlg,IDC_QUALITY8,IDC_QUALITY16,IDC_QUALITY8);
 
       // set "channels"
       if (next.harmonic)
@@ -318,7 +318,7 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
       break;
     }
     case WM_DESTROY:
-	{
+    {
       // check "frequency"
       if (IsDlgButtonChecked(hwndDlg,IDC_FREQ1) == BST_CHECKED)
         next.replayfreq = 11025;
@@ -377,15 +377,15 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
     case WM_COMMAND:
     {
       switch (LOWORD(wParam))
-	{
-	case IDC_DIRECTORY:
+	  {
+	    case IDC_DIRECTORY:
         {
-	  // display folder selection dialog
+	      // display folder selection dialog
 	      wchar_t shd[_MAX_PATH] = { 0 };
 
           BROWSEINFO bi = { 0 };
-	  bi.hwndOwner = hwndDlg;
-	  bi.pszDisplayName = shd;
+	      bi.hwndOwner = hwndDlg;
+	      bi.pszDisplayName = shd;
 	      bi.lpszTitle = TEXT("Select output path for Disk Writer:");
 	      bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
           bi.lpfn = BrowseCallbackProc;
@@ -397,47 +397,47 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
             next.diskdir = PathFromPIDL(pidl, shd, ARRAYSIZE(shd), true);
             WritePrivateProfileString(L"in_adlib", L"diskdir", next.diskdir.c_str(), GetPaths()->winamp_ini_file);
             SetDlgItemText(hwndDlg, IDC_DIRECTORY, next.diskdir.c_str());
-		}
+	      }
           break;
-	    }
-    case IDC_COMBO1:
-    case IDC_COMBO2:
-    case IDC_ALTSYNTH:
-    case IDC_OUTDISK:
+        }
+        case IDC_COMBO1:
+        case IDC_COMBO2:
+        case IDC_ALTSYNTH:
+        case IDC_OUTDISK:
         {
-      syncControlStates(hwndDlg);
-      break;
-    }
+          syncControlStates(hwndDlg);
+          break;
+        }
 	    case IDC_DATABASE:
-	{
+        {
           OPENFILENAME ofn = { 0 };
 
-	  ofn.lStructSize = sizeof(ofn);
-	  ofn.hwndOwner = hwndDlg;
+	      ofn.lStructSize = sizeof(ofn);
+	      ofn.hwndOwner = hwndDlg;
 	      ofn.lpstrFilter = TEXT("AdPlug Database Files (*.DB)\0*.db\0\0");
 	      ofn.lpstrFile = (LPWSTR)plugin.memmgr->sysMalloc(_MAX_PATH * sizeof(wchar_t));
 	      wcscpy(ofn.lpstrFile, next.db_file.c_str());
-	  ofn.nMaxFile = _MAX_PATH;
+	      ofn.nMaxFile = _MAX_PATH;
 	      ofn.lpstrTitle = TEXT("Select Database File");
-	  ofn.Flags = OFN_FILEMUSTEXIST;
+	      ofn.Flags = OFN_FILEMUSTEXIST;
 
 	      if (GetFileName(&ofn))
-	    {
+	      {
 	        next.db_file = ofn.lpstrFile;
             WritePrivateProfileString(L"in_adlib", L"database", next.db_file.c_str(), GetPaths()->winamp_ini_file);
 
 	        SetDlgItemText(hwndDlg,IDC_DATABASE, next.db_file.c_str());
-		}
+	      }
           plugin.memmgr->sysFree(ofn.lpstrFile);
           break;
-	    }
-	case IDC_TESTLOOP:
+        }
+	    case IDC_TESTLOOP:
         {
-	  bool bTestloop = IsDlgButtonChecked(hwndDlg, IDC_TESTLOOP) == BST_CHECKED;
-	  EnableWindow(GetDlgItem(hwndDlg, IDC_SUBSEQ), bTestloop);
-	  break;
-	}
-    }
+	      bool bTestloop = IsDlgButtonChecked(hwndDlg, IDC_TESTLOOP) == BST_CHECKED;
+	      EnableWindow(GetDlgItem(hwndDlg, IDC_SUBSEQ), bTestloop);
+	      break;
+        }
+      }
     }
   }
 
@@ -485,23 +485,23 @@ BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM
     {
       // read listbox
       for (i=0;i<filetypes.get_size();i++)
-	filetypes.set_ignore(i,SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_GETSEL,i,0) ? false : true);
+	    filetypes.set_ignore(i,SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_GETSEL,i,0) ? false : true);
 
       break;
     }
 
     case WM_COMMAND:
       switch (LOWORD(wParam))
-	{
-	case IDC_FTSELALL:
-	  SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,TRUE,-1);
+	  {
+	    case IDC_FTSELALL:
+	      SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,TRUE,-1);
         break;
 
-	case IDC_FTDESELALL:
-	  SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,FALSE,-1);
+	    case IDC_FTDESELALL:
+	      SendDlgItemMessage(hwndDlg,IDC_FORMATLIST,LB_SETSEL,FALSE,-1);
         break;
-	}
-    }
+	  }
+  }
 
   return FALSE;
 }

@@ -39,7 +39,7 @@ CRITICAL_SECTION g_ft_cs = { 0 };
 Config			config;
 FileTypes		filetypes;
 MyPlayer		my_player;
-GuiDlgConfig		dlg_config;
+GuiDlgConfig	dlg_config;
 GuiDlgInfo		dlg_info;
 
 TEmulInfo infoEmuls[MAX_EMULATORS] = {
@@ -73,7 +73,7 @@ void read_config(void)
     config.get(&cfg);
 
     plugin.UsesOutputPlug = config.useoutputplug;
-}
+  }
 }
 
 /*typedef struct
@@ -150,18 +150,18 @@ void wa2_Quit(void)
 {
   AutoCharFn fn(file);
   if (filetypes.grata(fn) != -1)
-    {
-      CSilentopl silent;
+  {
+    CSilentopl silent;
 
-      // try to make adplug player
+    // try to make adplug player
     CPlayer* p = CAdPlug::factory(std::string(fn), &silent);
 
-      if (p)
+    if (p)
 	{
 	  delete p;
 	  return 1;
 	}
-    }
+  }
   return 0;
 }*/
 
@@ -174,13 +174,13 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
   if ((!file) || (!(*file)))
     my_file = my_player.get_file();
   else
-    {
-      // our file ?
+  {
+    // our file ?
     /*if (!wa2_IsOurFile(file))
 	  return;*/
 
     my_file = fn;
-    }
+  }
 
   // set default info
   if (title)
@@ -198,10 +198,10 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
   // try to get real info
   CSilentopl silent;
 
-  CPlayer *p = CAdPlug::factory(my_file,&silent);
+  CPlayer* p = CAdPlug::factory(my_file, &silent);
 
   if (p)
-    {
+  {
       // TODO
       if (title)
       {
@@ -218,11 +218,11 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
         }
       }
 
-      if (length_in_ms)
+    if (length_in_ms)
       *length_in_ms = my_player.get_length(my_file,(file ? my_player.get_subsong() : DFL_SUBSONG));
 
-      delete p;
-    }
+    delete p;
+  }
 }
 
 int wa2_Play(const in_char *file)
@@ -438,7 +438,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 }
 
 void SetFileExtensions(const wchar_t* ignore_list)
-  {
+{
   filetypes.set_ignore_list(ignore_list);
 
   if (plugin.FileExtensions)
@@ -508,8 +508,8 @@ void __cdecl GetFileExtensions(void)
 
         SetFileExtensions(config.get_ignored());
 
-    LeaveCriticalSection(&g_ft_cs);
-}
+        LeaveCriticalSection(&g_ft_cs);
+    }
 }
 
 In_Module plugin =
@@ -610,5 +610,6 @@ extern "C" __declspec(dllexport) void winampGetExtendedRead_close(intptr_t handl
   {
     decoder->close();
     delete decoder;
+  }
 }
 }
