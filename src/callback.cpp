@@ -129,7 +129,7 @@ DWORD WINAPI MyPlayer::callback_emuts(LPVOID lpParameter)
 
       // vis
       plugin.SAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),plugin.outMod->GetWrittenTime());
-      plugin.VSAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),plugin.outMod->GetWrittenTime());
+      /*plugin.VSAAddPCMData(sndbuf,(the->work.stereo ? 2 : 1),(the->work.use16bit ? 16 : 8),plugin.outMod->GetWrittenTime());*/
 
       // update FileInfo
       dlg_info.update();

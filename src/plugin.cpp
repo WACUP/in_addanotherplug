@@ -539,7 +539,7 @@ In_Module plugin =
     wa2_SetOutputTime,
     wa2_SetVolume,
     wa2_SetPan,
-    0,0,0,0,0,0,0,0,0, // vis stuff
+    IN_INIT_VIS_RELATED_CALLS,
     0,0,	// dsp
     IN_INIT_WACUP_EQSET_EMPTY
     NULL,	// setinfo

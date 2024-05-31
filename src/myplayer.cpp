@@ -432,8 +432,11 @@ void MyPlayer::output_done()
     case emuks:
     case emuwo:
     case emunk:
+	  if (plugin.outMod && plugin.outMod->Close)
+	  {
+	    plugin.outMod->Close();
+	  }
       plugin.SAVSADeInit();
-      plugin.outMod->Close();
       break;
     case disk:
       // no deinit necessary

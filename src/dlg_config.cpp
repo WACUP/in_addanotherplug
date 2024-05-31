@@ -165,9 +165,9 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
 
       for (int i = 0; i < 2; i++)
 	  {
-	    SetWindowPos(GetDlgItem(hwndDlg, 10000 + i), NULL, r.left,
-                     r.top, (r.right - r.left), (r.bottom - r.top),
-					 SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
+	    SetDlgItemPos(hwndDlg, (10000 + i), NULL, r.left,
+                      r.top, (r.right - r.left), (r.bottom - r.top),
+					  SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
 	  }
 	  break;
 	}
