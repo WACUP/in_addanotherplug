@@ -25,8 +25,6 @@
 #include <../../loader/loader/utils.h>
 #include <../../sdk/nu/autocharfn.h>
 
-#include <../../wacup_version.h>
-
 #ifdef DEBUG
 #	include "debug.h"
 #endif
@@ -188,7 +186,7 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
     const char* fn = strrchr(my_file, '\\');
     if (fn && *fn)
     {
-      ConvertANSI(fn + 1, CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
+      ConvertANSI(fn + 1, -1, CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
     }
   }
 
@@ -214,7 +212,7 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
         }
         else if (!p->gettitle().empty())
         {
-          ConvertANSI(p->gettitle().c_str(), CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
+          ConvertANSI(p->gettitle().c_str(), p->gettitle().size(), CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
         }
       }
 
@@ -293,9 +291,9 @@ void wa2_About(HWND hwndParent)
                   L"Copyright © Stas'M (2016-2017)\n\n\nParts of the "
                   L"plug-in & AdPlug library originally\nfrom https://"
                   L"adplug.github.io(as per the LGPL)\n\nWACUP "
-                  L"modifications by " WACUP_AUTHOR_STRW L" (%s)\n\nBuild "
-                  L"date: %s", (LPCWSTR)plugin.description, L"beta483",
-                  L"2022-" WACUP_COPYRIGHT, TEXT(__DATE__));
+                  L"modifications by %s (2022-%s)\n\nBuild date: %s",
+                  (LPCWSTR)plugin.description, L"beta483",
+                  WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
   AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
 }
 
@@ -394,7 +392,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !p->gettitle().empty() && ((int)p->gettitle().length() < retlen);
     if (result)
     {
-      ConvertANSI(p->gettitle().c_str(), CP_ACP, ret, retlen);
+      ConvertANSI(p->gettitle().c_str(), p->gettitle().size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "artist"))
@@ -402,7 +400,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !p->getauthor().empty() && ((int)p->getauthor().length() < retlen);
     if (result)
     {
-      ConvertANSI(p->getauthor().c_str(), CP_ACP, ret, retlen);
+      ConvertANSI(p->getauthor().c_str(), p->getauthor().size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "comment"))
@@ -410,7 +408,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !p->getdesc().empty() && ((int)p->getdesc().length() < retlen);
     if (result)
     {
-      ConvertANSI(p->getdesc().c_str(), CP_ACP, ret, retlen);
+      ConvertANSI(p->getdesc().c_str(), p->getdesc().size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "formatinformation"))
@@ -418,7 +416,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !p->gettype().empty() && ((int)p->gettype().length() < retlen);
     if (result)
     {
-      ConvertANSI(p->gettype().c_str(), CP_ACP, ret, retlen);
+      ConvertANSI(p->gettype().c_str(), p->gettype().size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "length"))
