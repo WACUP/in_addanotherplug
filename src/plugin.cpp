@@ -449,7 +449,7 @@ void SetFileExtensions(const wchar_t* ignore_list)
 void __cdecl GetFileExtensions(void)
 {
     static bool loaded_extensions;
-    if (!loaded_extensions)
+    if (!loaded_extensions && !!plugin.hDllInstance)
     {
         loaded_extensions = true;
 

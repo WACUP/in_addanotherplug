@@ -281,7 +281,7 @@ int MyPlayer::get_position()
     case emuks:
     case emuwo:
     case emunk:
-      return plugin.outMod->GetOutputTime();
+      return (plugin.outMod ? plugin.outMod->GetOutputTime() : 0);
     case disk:
       return (int)plr.outtime;
     }
@@ -307,7 +307,10 @@ void MyPlayer::set_volume(int vol)
     case emuks:
     case emuwo:
     case emunk:
-      plugin.outMod->SetVolume(vol);
+      if (plugin.outMod)
+      {
+        plugin.outMod->SetVolume(vol);
+      }
       break;
     case disk:
       // disk writer does not obey volume control
@@ -326,7 +329,10 @@ void MyPlayer::set_panning(int pan)
     case emuks:
     case emuwo:
     case emunk:
-      plugin.outMod->SetPan(pan);
+      if (plugin.outMod)
+      {
+        plugin.outMod->SetPan(pan);
+      }
       break;
 
     case disk:
@@ -409,7 +415,8 @@ bool MyPlayer::output_init()
     case emuks:
     case emuwo:
     case emunk:
-      maxlatency = (plugin.outMod->Open ? plugin.outMod->Open(work.replayfreq,(work.stereo ? 2 : 1),(work.use16bit ? 16 : 8),-1,-1) : -1);
+      maxlatency = (plugin.outMod->Open && work.replayfreq ? plugin.outMod->Open(work.replayfreq,
+                                  (work.stereo ? 2 : 1), (work.use16bit ? 16 : 8), -1, -1) : -1);
       if (maxlatency < 0)
 	return false;
       plugin.outMod->SetVolume(-666);
@@ -436,7 +443,10 @@ void MyPlayer::output_done()
 	  {
 	    plugin.outMod->Close();
 	  }
-      plugin.SAVSADeInit();
+      if (plugin.outMod)
+      {
+        plugin.SAVSADeInit();
+      }
       break;
     case disk:
       // no deinit necessary
