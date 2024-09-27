@@ -23,6 +23,7 @@
 #include <../../loader/loader/paths.h>
 #define WA_UTILS_SIMPLE
 #include <../../loader/loader/utils.h>
+#include <../../loader/loader/runtime_helper.h>
 #include <../../sdk/nu/autocharfn.h>
 
 #ifdef DEBUG
@@ -610,4 +611,5 @@ extern "C" __declspec(dllexport) void winampGetExtendedRead_close(intptr_t handl
     delete decoder;
   }
 }
-}
+
+RUNTIME_HELPER_HANDLER
