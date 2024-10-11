@@ -146,12 +146,16 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
       SetDlgItemTextA(hwndDlg,IDC_INSTLIST,bufxstr.c_str());
 
       // set "description" (ANSI "\n" to Windows "\r\n")
+	  // whilst avoiding crashing if there's no string
       bufxstr = fileinfo_player->getdesc();
-      while ((spos = bufxstr.find('\n',spos)) != bufxstr.npos)
-	{
-	  bufxstr.insert(spos,"\r");
-	  spos += 2;
-	}
+	  if (!bufxstr.empty())
+	  {
+		  while ((spos = bufxstr.find('\n', spos)) != bufxstr.npos)
+		  {
+			  bufxstr.insert(spos, "\r");
+			  spos += 2;
+		  }
+	  }
       SetDlgItemTextA(hwndDlg,IDC_DESCRIPTION,bufxstr.c_str());
 
       // set "subsong" slider
