@@ -60,19 +60,20 @@ TEmulInfo infoEmuls[MAX_EMULATORS] = {
     false, true, true},
 };
 
-void read_config(void)
+t_config_data read_config(void)
 {
+  static t_config_data cfg;
   static bool config_read;
   if (!config_read)
   {
     config_read = true;
 
-    t_config_data	cfg;
     config.load();
     config.get(&cfg);
 
     plugin.UsesOutputPlug = config.useoutputplug;
   }
+  return cfg;
 }
 
 /*typedef struct
@@ -429,6 +430,17 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
       length_in_ms = my_player.get_length(my_file, DFL_SUBSONG);
     sprintf(ret, "%d", length_in_ms);*/
     I2WStr(my_player.get_length(my_file, (file ? my_player.get_subsong() : DFL_SUBSONG)), ret, retlen);
+    result = true;
+  }
+  else if (SameStrA(metadata, "bitrate"))
+  {
+    // TODO is 120kbps correct...?
+    wcsncpy(ret, L"120", retlen);
+    result = true;
+  }
+  else if (SameStrA(metadata, "samplerate"))
+  {
+    I2WStr(read_config().replayfreq, ret, retlen);
     result = true;
   }
 

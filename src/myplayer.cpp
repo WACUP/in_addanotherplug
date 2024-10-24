@@ -172,7 +172,7 @@ int MyPlayer::play(const char *fname)
   player->rewind(plr.subsong);
 
   // set winamp info
-  plugin.SetInfo(120000,work.replayfreq/1000,(work.stereo ? 2 : 1),1);
+  plugin.SetInfo(120,work.replayfreq/1000,(work.stereo ? 2 : 1),1);
 
   // init thread
   if (!thread_init())
