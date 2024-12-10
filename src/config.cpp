@@ -116,7 +116,7 @@ void Config::load(void)
     strcpy(curdir, std::getenv("ALLUSERSPROFILE"));
   if (curdir == "")
     GetCurrentDirectoryA(MAX_PATH, curdir);*/
-  if (curdir != L"")
+  if (curdir[0])
   {
     wcscat(curdir, L"\\");
     GetPrivateProfileString(L"in_adlib", L"diskdir", curdir, bufstr, MAX_PATH, fname);

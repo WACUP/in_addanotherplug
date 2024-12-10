@@ -100,10 +100,10 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
       tci.mask = TCIF_TEXT;
 
       // TODO localise
-      tci.pszText = TEXT("Playback Options");
+      tci.pszText = (LPWSTR)TEXT("Playback Options");
       SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,0,(LPARAM)&tci);
 		
-      tci.pszText = TEXT("Supported Formats");
+      tci.pszText = (LPWSTR)TEXT("Supported Formats");
       SendDlgItemMessage(hwndDlg,IDC_TABBED_PREFS_TAB,TCM_INSERTITEM,1,(LPARAM)&tci);
 
       // display new tab window

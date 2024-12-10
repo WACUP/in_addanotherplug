@@ -454,7 +454,7 @@ void SetFileExtensions(const wchar_t* ignore_list)
 
   if (plugin.FileExtensions)
   {
-    plugin.memmgr->sysFree(plugin.FileExtensions);
+    plugin.memmgr->sysFree((void*)plugin.FileExtensions);
   }
   plugin.FileExtensions = (char*)filetypes.export_filetypes((wchar_t*)plugin.memmgr->sysMalloc(4096 * sizeof(wchar_t)));
 }
