@@ -46,5 +46,5 @@ class GuiDlgInfo
   unsigned int	fi_speed;
   float		fi_refresh;
 
-  CSilentopl	silent;
+  //CSilentopl	silent;
 };

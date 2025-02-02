@@ -27,6 +27,7 @@ extern In_Module plugin;
 extern Config config;
 extern GuiDlgInfo dlg_info;
 extern TEmulInfo infoEmuls[MAX_EMULATORS];
+extern CSilentopl silent;
 
 int thread_priority[] = {
   THREAD_PRIORITY_IDLE,
@@ -260,7 +261,7 @@ int MyPlayer::get_length()
 
 int MyPlayer::get_length(const char *fname, int subsong)
 {
-  CSilentopl silent;
+  //CSilentopl silent;
 
   CPlayer *p = CAdPlug::factory(fname,&silent);
   if (!p)

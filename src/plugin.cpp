@@ -40,6 +40,9 @@ FileTypes		filetypes;
 MyPlayer		my_player;
 GuiDlgConfig	dlg_config;
 GuiDlgInfo		dlg_info;
+CPlayer         *metadata_info = NULL;
+std::string	    last_meta_fn;
+CSilentopl      silent;
 
 TEmulInfo infoEmuls[MAX_EMULATORS] = {
   {emunk, TEXT("Nuked OPL3 (Nuke.YKT, 2017)"),
@@ -165,6 +168,38 @@ void wa2_Quit(void)
   return 0;
 }*/
 
+const bool get_metadata_info(const char *file, const bool reset)
+{
+  if (reset || !metadata_info || !SameStrA(last_meta_fn.c_str(), file))
+  {
+    if (metadata_info != NULL)
+    {
+      delete metadata_info;
+      metadata_info = NULL;
+    }
+
+    if (!reset && !metadata_info)
+    {
+      //CSilentopl silent;
+
+      metadata_info = CAdPlug::factory(file, &silent);
+      if (metadata_info)
+      {
+        last_meta_fn = file;
+      }
+      else
+      {
+        last_meta_fn.clear();
+      }
+    }
+    else if (reset)
+    {
+      last_meta_fn.clear();
+    }
+  }
+  return !!metadata_info;
+}
+
 void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 {
   AutoCharFn fn(file);
@@ -196,32 +231,25 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
     *length_in_ms = 0;
 
   // try to get real info
-  CSilentopl silent;
-
-  CPlayer* p = CAdPlug::factory(my_file, &silent);
-
-  if (p)
+  if ((title || length_in_ms) && get_metadata_info(my_file, false))
   {
-      // TODO
-      if (title)
-      {
-        // Wraithverge: modified this code to show the "Author" + "Title"
-        // in the "Song Title" window, instead of just "Title", but only
-        // if both Tag-data exists.
-        if (!p->getauthor().empty() && !p->gettitle().empty()) {
-          StringCchPrintf(title, GETFILEINFO_TITLE_LENGTH, L"%hs - %hs",
-                          p->getauthor().c_str(), p->gettitle().c_str());
-        }
-        else if (!p->gettitle().empty())
-        {
-          ConvertANSI(p->gettitle().c_str(), p->gettitle().size(), CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
-        }
+    if (title)
+    {
+      // Wraithverge: modified this code to show the "Author" + "Title"
+      // in the "Song Title" window, instead of just "Title", but only
+      // if both Tag-data exists.
+      const auto& author = metadata_info->getauthor(), &_title = metadata_info->gettitle();
+      if (!author.empty() && !_title.empty()) {
+        StringCchPrintf(title, GETFILEINFO_TITLE_LENGTH, L"%hs - %hs", author.c_str(), _title.c_str());
       }
+      else if (!_title.empty())
+      {
+        ConvertANSI(_title.c_str(), _title.size(), CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
+      }
+    }
 
     if (length_in_ms)
-      *length_in_ms = my_player.get_length(my_file,(file ? my_player.get_subsong() : DFL_SUBSONG));
-
-    delete p;
+      *length_in_ms = metadata_info->songlength((file ? my_player.get_subsong() : DFL_SUBSONG));
   }
 }
 
@@ -294,7 +322,7 @@ void wa2_About(HWND hwndParent)
                   L"plug-in & AdPlug library originally\nfrom https://"
                   L"adplug.github.io(as per the LGPL)\n\nWACUP "
                   L"modifications by %s (2022-%s)\n\nBuild date: %s",
-                  (LPCWSTR)plugin.description, L"beta483",
+                  (LPCWSTR)plugin.description, L"beta863",
                   WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
   AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
 }
@@ -345,8 +373,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   else if (SameStrA(metadata, "streamgenre") ||
            SameStrA(metadata, "streamtype") ||
            SameStrA(metadata, "streamurl") ||
-           SameStrA(metadata, "streamname") ||
-           SameStrA(metadata, "reset"))
+           SameStrA(metadata, "streamname"))
   {
     return false;
   }
@@ -380,62 +407,58 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     my_file = fn;
   }
 
-  CSilentopl silent;
+  if (!get_metadata_info(my_file, SameStrA(metadata, "reset"))) return false;
 
-  CPlayer *p = CAdPlug::factory(my_file, &silent);
-  if (!p) return false;
-
-  // default to a blank string
-  *ret = L'\0';
   bool result = false;
 
   if (SameStrA(metadata, "title"))
   {
-    result = !p->gettitle().empty() && ((int)p->gettitle().length() < retlen);
+    const auto& title = metadata_info->gettitle();
+    result = !title.empty() && ((int)title.length() < retlen);
     if (result)
     {
-      ConvertANSI(p->gettitle().c_str(), p->gettitle().size(), CP_ACP, ret, retlen);
+      ConvertANSI(title.c_str(), title.size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "artist"))
   {
-    result = !p->getauthor().empty() && ((int)p->getauthor().length() < retlen);
+    const auto& author = metadata_info->getauthor();
+    result = !author.empty() && ((int)author.length() < retlen);
     if (result)
     {
-      ConvertANSI(p->getauthor().c_str(), p->getauthor().size(), CP_ACP, ret, retlen);
+      ConvertANSI(author.c_str(), author.size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "comment"))
   {
-    result = !p->getdesc().empty() && ((int)p->getdesc().length() < retlen);
+    const auto& desc = metadata_info->getdesc();
+    result = !desc.empty() && ((int)desc.length() < retlen);
     if (result)
     {
-      ConvertANSI(p->getdesc().c_str(), p->getdesc().size(), CP_ACP, ret, retlen);
+      ConvertANSI(desc.c_str(), desc.size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "formatinformation"))
   {
-    result = !p->gettype().empty() && ((int)p->gettype().length() < retlen);
+    const auto& type = metadata_info->gettype();
+    result = !type.empty() && ((int)type.length() < retlen);
     if (result)
     {
-      ConvertANSI(p->gettype().c_str(), p->gettype().size(), CP_ACP, ret, retlen);
+      ConvertANSI(type.c_str(), type.size(), CP_ACP, ret, retlen);
     }
   }
   else if (SameStrA(metadata, "length"))
   {
-    /*int length_in_ms;
-    if (file)
-      length_in_ms = my_player.get_length(my_file, my_player.get_subsong());
-    else
-      length_in_ms = my_player.get_length(my_file, DFL_SUBSONG);
-    sprintf(ret, "%d", length_in_ms);*/
-    I2WStr(my_player.get_length(my_file, (file ? my_player.get_subsong() : DFL_SUBSONG)), ret, retlen);
+    I2WStr(metadata_info->songlength((file ? my_player.get_subsong() : DFL_SUBSONG)), ret, retlen);
     result = true;
   }
   else if (SameStrA(metadata, "bitrate"))
   {
     // TODO is 120kbps correct...?
-    wcsncpy(ret, L"120", retlen);
+    ret[0] = L'1';
+    ret[1] = L'2';
+    ret[2] = L'0';
+    ret[3] = L'\0';
     result = true;
   }
   else if (SameStrA(metadata, "samplerate"))
@@ -443,8 +466,15 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     I2WStr(read_config().replayfreq, ret, retlen);
     result = true;
   }
+  else if (SameStrA(metadata, "bitdepth"))
+  {
+    // TODO
+    ret[0] = L'-';
+    ret[1] = L'1';
+    ret[2] = 0;
+    result = true;
+  }
 
-  delete p;
   return result;
 }
 

@@ -23,6 +23,7 @@
 
 extern In_Module plugin;
 extern MyPlayer my_player;
+extern CSilentopl silent;
 
 GuiDlgInfo::GuiDlgInfo()
 {
