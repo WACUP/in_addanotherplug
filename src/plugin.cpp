@@ -486,7 +486,9 @@ void SetFileExtensions(const wchar_t* ignore_list)
   {
     plugin.memmgr->sysFree((void*)plugin.FileExtensions);
   }
-  plugin.FileExtensions = (char*)filetypes.export_filetypes((wchar_t*)plugin.memmgr->sysMalloc(4096 * sizeof(wchar_t)));
+  // around 3072 bytes is currently needed so we've got a
+  // bit of extra wiggle room to avoid going out of range
+  plugin.FileExtensions = (char*)filetypes.export_filetypes((wchar_t*)plugin.memmgr->sysMalloc(3200 * sizeof(wchar_t)));
 }
 
 void __cdecl GetFileExtensions(void)
