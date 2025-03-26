@@ -416,8 +416,9 @@ bool MyPlayer::output_init()
     case emuks:
     case emuwo:
     case emunk:
-      maxlatency = (plugin.outMod->Open && work.replayfreq ? plugin.outMod->Open(work.replayfreq,
-                                  (work.stereo ? 2 : 1), (work.use16bit ? 16 : 8), -1, -1) : -1);
+      maxlatency = (plugin.outMod && plugin.outMod->Open && work.replayfreq ?
+                    plugin.outMod->Open(work.replayfreq, (work.stereo ? 2 : 1),
+                                       (work.use16bit ? 16 : 8), -1, -1) : -1);
       if (maxlatency < 0)
 	return false;
       plugin.outMod->SetVolume(-666);
