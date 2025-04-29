@@ -415,7 +415,7 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
 	      ofn.lStructSize = sizeof(ofn);
 	      ofn.hwndOwner = hwndDlg;
 	      ofn.lpstrFilter = TEXT("AdPlug Database Files (*.DB)\0*.db\0\0");
-	      ofn.lpstrFile = (LPWSTR)plugin.memmgr->sysMalloc(_MAX_PATH * sizeof(wchar_t));
+	      ofn.lpstrFile = (LPWSTR)SafeMalloc(_MAX_PATH * sizeof(wchar_t));
 	      wcscpy(ofn.lpstrFile, next.db_file.c_str());
 	      ofn.nMaxFile = _MAX_PATH;
 	      ofn.lpstrTitle = TEXT("Select Database File");
@@ -428,7 +428,7 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
 
 	        SetDlgItemText(hwndDlg,IDC_DATABASE, next.db_file.c_str());
 	      }
-          plugin.memmgr->sysFree(ofn.lpstrFile);
+          SafeFree(ofn.lpstrFile);
           break;
         }
 	    case IDC_TESTLOOP:

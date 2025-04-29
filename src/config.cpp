@@ -279,7 +279,7 @@ bool Config::use_database(void)
   if(mydb) { delete mydb; mydb = 0; }
   if(next.usedb) {
     mydb = new CAdPlugDatabase;
-    AutoCharFn db_file(next.db_file.c_str());
+    const AutoCharFn db_file(next.db_file.c_str());
     success = mydb->load(std::string(db_file));
   }
   CAdPlug::set_database(mydb);

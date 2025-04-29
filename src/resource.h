@@ -27,6 +27,7 @@
 #define IDD_CFG_OUTPUT                  103
 #define IDD_CFG_FORMATS                 104
 #define IDD_FILEINFO                    105
+#define IDR_ABOUT_TEXT_GZ               108
 #define IDR_TEXT_HISTORY                116
 #define IDR_TEXT_LICENSE                117
 #define IDC_FREQ1                       1001
@@ -78,7 +79,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        108
+#define _APS_NEXT_RESOURCE_VALUE        109
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1000
 #define _APS_NEXT_SYMED_VALUE           101

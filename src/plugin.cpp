@@ -21,6 +21,7 @@
 #include"api.h"
 
 #include <../../loader/loader/paths.h>
+#include <../../loader/hook/squash.h>
 #define WA_UTILS_SIMPLE
 #include <../../loader/loader/utils.h>
 #include <../../loader/loader/runtime_helper.h>
@@ -115,8 +116,8 @@ int wa2_Init(void)
   // TODO localise
   wchar_t description[256] = { 0 };
   // "AdPlug v" ADPLUG_VERSION "/v" PLUGIN_VERSION
-  StringCchPrintfW(description, ARRAYSIZE(description), L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
-  plugin.description = (char*)plugin.memmgr->sysDupStr(description);
+  PrintfCch(description, ARRAYSIZE(description), L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
+  plugin.description = (char*)SafeWideDup(description);
 
   preferences = (prefsDlgRecW*)GlobalAlloc(GPTR, sizeof(prefsDlgRecW));
   if (preferences)
@@ -124,7 +125,7 @@ int wa2_Init(void)
       // TODO localise
       preferences->hInst = GetModuleHandle(GetPaths()->wacup_core_dll);
       preferences->dlgID = IDD_TABBED_PREFS_DIALOG;
-      preferences->name = /*WASABI_API_LNGSTRINGW_DUP(IDS_VGM)*/plugin.memmgr->sysDupStr(L"ADLIB | ADPLUG");
+      preferences->name = /*LngStringDup(IDS_VGM)*/SafeWideDup(L"ADLIB | ADPLUG");
       preferences->proc = ConfigDialogProc;
       preferences->where = 10;
       preferences->_id = 100;
@@ -151,7 +152,7 @@ void wa2_Quit(void)
 
 /*int wa2_IsOurFile(const in_char *file)
 {
-  AutoCharFn fn(file);
+  const AutoCharFn fn(file);
   if (filetypes.grata(fn) != -1)
   {
     CSilentopl silent;
@@ -202,7 +203,7 @@ const bool get_metadata_info(const char *file, const bool reset)
 
 void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
 {
-  AutoCharFn fn(file);
+  const AutoCharFn fn(file);
   const char *my_file;
 
   // current file ?
@@ -240,7 +241,7 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
       // if both Tag-data exists.
       const auto& author = metadata_info->getauthor(), &_title = metadata_info->gettitle();
       if (!author.empty() && !_title.empty()) {
-        StringCchPrintf(title, GETFILEINFO_TITLE_LENGTH, L"%hs - %hs", author.c_str(), _title.c_str());
+        PrintfCch(title, GETFILEINFO_TITLE_LENGTH, L"%hs - %hs", author.c_str(), _title.c_str());
       }
       else if (!_title.empty())
       {
@@ -257,7 +258,7 @@ int wa2_Play(const in_char *file)
 {
   read_config();
 
-  AutoCharFn fn(file);
+  const AutoCharFn fn(file);
   return my_player.play(fn);
 }
 
@@ -314,17 +315,14 @@ void wa2_SetPan(int pan)
 void wa2_About(HWND hwndParent)
 {
   // TODO localise
+  const unsigned char *output = DecompressResourceText(plugin.hDllInstance, plugin.hDllInstance, IDR_ABOUT_TEXT_GZ);
+  // TODO localise
   wchar_t message[2048] = { 0 };
-  StringCchPrintf(message, ARRAYSIZE(message), L"%s (%s)\n\nCopyright "
-                  L"© Simon Peter (1999-2010)\nCopyright © Nikita V. "
-                  L"Kalaganov (2002)\nCopyright © Wraithverge (2010)\n"
-                  L"Copyright © Stas'M (2016-2017)\n\n\nParts of the "
-                  L"plug-in & AdPlug library originally\nfrom https://"
-                  L"adplug.github.io(as per the LGPL)\n\nWACUP "
-                  L"modifications by %s (2022-%s)\n\nBuild date: %s",
-                  (LPCWSTR)plugin.description, L"beta863",
-                  WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
+  PrintfCch(message, ARRAYSIZE(message), (LPCWSTR)output,
+            (LPCWSTR)plugin.description, L"beta863",
+            WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
   AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
+  SafeFree((void*)output);
 }
 
 void wa2_DlgConfig(HWND hwndParent)
@@ -334,7 +332,7 @@ void wa2_DlgConfig(HWND hwndParent)
 
 int wa2_DlgInfo(const in_char *file, HWND hwndParent)
 {
-  AutoCharFn fn(file);
+  const AutoCharFn fn(file);
   return dlg_info.open(fn, hwndParent);
 }
 
@@ -392,7 +390,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 
   read_config();
 
-  AutoCharFn fn(file);
+  const AutoCharFn fn(file);
   const char *my_file;
 
   // current file ?
@@ -484,11 +482,11 @@ void SetFileExtensions(const wchar_t* ignore_list)
 
   if (plugin.FileExtensions)
   {
-    plugin.memmgr->sysFree((void*)plugin.FileExtensions);
+    SafeFree((void*)plugin.FileExtensions);
   }
   // around 3072 bytes is currently needed so we've got a
   // bit of extra wiggle room to avoid going out of range
-  plugin.FileExtensions = (char*)filetypes.export_filetypes((wchar_t*)plugin.memmgr->sysMalloc(3200 * sizeof(wchar_t)));
+  plugin.FileExtensions = (char*)filetypes.export_filetypes((wchar_t*)SafeMalloc(3200 * sizeof(wchar_t)));
 }
 
 void __cdecl GetFileExtensions(void)
@@ -603,7 +601,7 @@ extern "C" __declspec(dllexport) In_Module *winampGetInModule2()
 extern "C" __declspec(dllexport) int winampUninstallPlugin(HINSTANCE hDllInst, HWND hwndDlg, int param)
 {
     // prompt to remove our settings with default as no (just incase)
-    /*if (plugin.language->UninstallSettingsPrompt(reinterpret_cast<const wchar_t*>(plugin.description)))
+    /*if (UninstallSettingsPrompt(reinterpret_cast<const wchar_t*>(plugin.description)))
     {
         SaveNativeIniString(PLUGIN_INI, _T("APE Plugin Settings"), 0, 0);
     }*/
@@ -619,7 +617,7 @@ extern "C" __declspec(dllexport) intptr_t winampGetExtendedRead_openW(const wcha
   MyPlayer* decoder = new MyPlayer();
   if (decoder)
   {
-    AutoCharFn fn(file);
+    const AutoCharFn fn(file);
     if (decoder->open(fn, bps, nch, srate))
     {
       *size = -1; // TODO need to get number of samples, etc
