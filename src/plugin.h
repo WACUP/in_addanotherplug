@@ -75,8 +75,8 @@ using namespace std;
 
 struct TEmulInfo {
 	t_output emul;
-	const wchar_t * name;
-	const wchar_t * description;
+	const char * name;
+	const char * description;
 	bool s_multi;       /* emulator allows multiple instances */
 	bool s_mono;        /* emulator supports mono output */
 	bool s_8bit;        /* emulator supports 8-bit PCM output */

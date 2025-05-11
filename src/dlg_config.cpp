@@ -241,9 +241,9 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
 
       // fill comboboxes
       for (i = 0; i < MAX_EMULATORS; i++) {
-        SendDlgItemMessage(hwndDlg, IDC_COMBO1, CB_ADDSTRING, 0, (LPARAM)infoEmuls[i].name);
+        SendDlgItemMessageA(hwndDlg, IDC_COMBO1, CB_ADDSTRING, 0, (LPARAM)infoEmuls[i].name);
         if (infoEmuls[i].s_multi)
-          SendDlgItemMessage(hwndDlg, IDC_COMBO2, CB_ADDSTRING, 0, (LPARAM)infoEmuls[i].name);
+          SendDlgItemMessageA(hwndDlg, IDC_COMBO2, CB_ADDSTRING, 0, (LPARAM)infoEmuls[i].name);
       }
 
       // adjust combobox height or dropdown lists won't be visible at all
@@ -381,7 +381,8 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
 	    case IDC_DIRECTORY:
         {
 	      // display folder selection dialog
-	      wchar_t shd[_MAX_PATH] = { 0 };
+	      wchar_t shd[_MAX_PATH]/* = { 0 }*/;
+          shd[0] = 0;
 
           BROWSEINFO bi = { 0 };
 	      bi.hwndOwner = hwndDlg;
@@ -552,7 +553,7 @@ void GuiDlgConfig::syncControlStates(HWND hwndDlg) const
   bool bEmu8bit = infoEmuls[i].s_8bit;
   bool bOutDisk = IsDlgButtonChecked(hwndDlg, IDC_OUTDISK) == BST_CHECKED;
   if (/*(i >= 0) && */(i < MAX_EMULATORS)) {
-    SetDlgItemText(hwndDlg, IDC_EMUINFO, infoEmuls[i].description);
+    SetDlgItemTextA(hwndDlg, IDC_EMUINFO, infoEmuls[i].description);
   }
   bool bAltSynth = IsDlgButtonChecked(hwndDlg, IDC_ALTSYNTH) == BST_CHECKED;
   //bool bIsStereo = IsDlgButtonChecked(hwndDlg, IDC_STEREO) == BST_CHECKED;

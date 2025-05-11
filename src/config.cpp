@@ -164,7 +164,7 @@ void Config::load(void)
 
 void WriteIniInt(const wchar_t* name, const int value, const int def_value)
 {
-  wchar_t bufstr[11] = { 0 };
+  wchar_t bufstr[11]/* = { 0 }*/;
   WritePrivateProfileString(L"in_adlib", name, ((value != def_value) ?
                             I2WStr(value, bufstr, ARRAYSIZE(bufstr)) :
                                   NULL), GetPaths()->winamp_ini_file);

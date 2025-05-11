@@ -508,7 +508,7 @@ const char *MyPlayer::get_diskfile(string& fname)
 
   if (plr.subsong)
   {
-    char bufstr[11] = { 0 };	  
+    char bufstr[11]/* = { 0 }*/; 
     I2AStr(plr.subsong,bufstr,10);
 
     diskfile.append(".");

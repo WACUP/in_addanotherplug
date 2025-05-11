@@ -46,21 +46,21 @@ std::string	    last_meta_fn;
 CSilentopl      silent;
 
 TEmulInfo infoEmuls[MAX_EMULATORS] = {
-  {emunk, TEXT("Nuked OPL3 (Nuke.YKT, 2017)"),
-    TEXT("Nuked OPL3 emulator by Alexey Khokholov (Nuke.YKT). "
-         "Set output frequency to 49716 Hz for best quality."),
+  {emunk, "Nuked OPL3 (Nuke.YKT, 2017)",
+    "Nuked OPL3 emulator by Alexey Khokholov (Nuke.YKT). "
+         "Set output frequency to 49716 Hz for best quality.",
     true, false, false},
-  {emuwo, TEXT("WoodyOPL (DOSBox, 2016)"),
-    TEXT("This is the most accurate OPL emulator, especially "
-         "when the frequency is set to 49716 Hz."),
+  {emuwo, "WoodyOPL (DOSBox, 2016)",
+    "This is the most accurate OPL emulator, especially "
+         "when the frequency is set to 49716 Hz.",
     true, true, true},
-  {emuts, TEXT("Tatsuyuki Satoh 0.72 (MAME, 2003)"),
-    TEXT("While not perfect, this synth comes very close "
-         "and for many years was the best there was."),
+  {emuts, "Tatsuyuki Satoh 0.72 (MAME, 2003)",
+    "While not perfect, this synth comes very close "
+         "and for many years was the best there was.",
     true, true, true},
-  {emuks, TEXT("Ken Silverman (2001)"),
-    TEXT("While inaccurate by today's standards, this emulator was "
-         "one of the earliest open-source OPL synths available."),
+  {emuks, "Ken Silverman (2001)",
+    "While inaccurate by today's standards, this emulator was "
+         "one of the earliest open-source OPL synths available.",
     false, true, true},
 };
 
@@ -114,7 +114,7 @@ INT_PTR CALLBACK ConfigDialogProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
 int wa2_Init(void)
 {
   // TODO localise
-  wchar_t description[256] = { 0 };
+  wchar_t description[256]/* = { 0 }*/;
   // "AdPlug v" ADPLUG_VERSION "/v" PLUGIN_VERSION
   PrintfCch(description, ARRAYSIZE(description), L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
   plugin.description = (char*)SafeWideDup(description);
@@ -224,7 +224,7 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
     const char* fn = strrchr(my_file, '\\');
     if (fn && *fn)
     {
-      ConvertANSI(fn + 1, -1, CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
+      ConvertANSI(fn + 1, -1, CP_ACP, title, GETFILEINFO_TITLE_LENGTH, NULL);
     }
   }
 
@@ -245,7 +245,7 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
       }
       else if (!_title.empty())
       {
-        ConvertANSI(_title.c_str(), _title.size(), CP_ACP, title, GETFILEINFO_TITLE_LENGTH);
+        ConvertANSI(_title.c_str(), _title.size(), CP_ACP, title, GETFILEINFO_TITLE_LENGTH, NULL);
       }
     }
 
@@ -317,7 +317,7 @@ void wa2_About(HWND hwndParent)
   // TODO localise
   const unsigned char *output = DecompressResourceText(plugin.hDllInstance, plugin.hDllInstance, IDR_ABOUT_TEXT_GZ);
   // TODO localise
-  wchar_t message[2048] = { 0 };
+  wchar_t message[2048]/* = { 0 }*/;
   PrintfCch(message, ARRAYSIZE(message), (LPCWSTR)output,
             (LPCWSTR)plugin.description, L"beta863",
             WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
@@ -415,7 +415,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !title.empty() && ((int)title.length() < retlen);
     if (result)
     {
-      ConvertANSI(title.c_str(), title.size(), CP_ACP, ret, retlen);
+      ConvertANSI(title.c_str(), title.size(), CP_ACP, ret, retlen, NULL);
     }
   }
   else if (SameStrA(metadata, "artist"))
@@ -424,7 +424,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !author.empty() && ((int)author.length() < retlen);
     if (result)
     {
-      ConvertANSI(author.c_str(), author.size(), CP_ACP, ret, retlen);
+      ConvertANSI(author.c_str(), author.size(), CP_ACP, ret, retlen, NULL);
     }
   }
   else if (SameStrA(metadata, "comment"))
@@ -433,7 +433,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !desc.empty() && ((int)desc.length() < retlen);
     if (result)
     {
-      ConvertANSI(desc.c_str(), desc.size(), CP_ACP, ret, retlen);
+      ConvertANSI(desc.c_str(), desc.size(), CP_ACP, ret, retlen, NULL);
     }
   }
   else if (SameStrA(metadata, "formatinformation"))
@@ -442,7 +442,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     result = !type.empty() && ((int)type.length() < retlen);
     if (result)
     {
-      ConvertANSI(type.c_str(), type.size(), CP_ACP, ret, retlen);
+      ConvertANSI(type.c_str(), type.size(), CP_ACP, ret, retlen, NULL);
     }
   }
   else if (SameStrA(metadata, "length"))
