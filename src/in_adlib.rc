@@ -229,7 +229,7 @@ END
 // GZ
 //
 
-IDR_ABOUT_TEXT_GZ       GZ                      "about.txt"
+IDR_ABOUT_TEXT_GZ       GZ                      "about.txt.gz"
 
 #endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
