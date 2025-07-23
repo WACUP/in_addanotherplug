@@ -368,10 +368,12 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     ret[1] = L'\0';
     return true;
   }
-  else if (SameStrA(metadata, "streamgenre") ||
-           SameStrA(metadata, "streamtype") ||
-           SameStrA(metadata, "streamurl") ||
-           SameStrA(metadata, "streamname"))
+  else if (SameStrNA(metadata, "stream", 6) &&
+           (SameStrA((metadata + 6), "type") ||
+            SameStrA((metadata + 6), "genre") ||
+            SameStrA((metadata + 6), "url") ||
+            SameStrA((metadata + 6), "name") ||
+			SameStrA((metadata + 6), "title")))
   {
     return false;
   }
