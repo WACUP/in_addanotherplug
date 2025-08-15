@@ -21,6 +21,8 @@ class FileTypes
 {
  public:
 
+  void      reserve(const size_t count);
+
   void		add(const wchar_t *type, const wchar_t *name, bool _ignore = false);
 
   wchar_t *	export_filetypes(wchar_t *buf);

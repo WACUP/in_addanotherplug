@@ -21,6 +21,13 @@
 #define WA_UTILS_SIMPLE
 #include <../../loader/loader/utils.h>
 
+void FileTypes::reserve(const size_t count)
+{
+  work.type.reserve(count);
+  work.name.reserve(count);
+  work.ignore.reserve(count);
+}
+
 void FileTypes::add(const wchar_t *type, const wchar_t *name, bool _ignore)
 {
   work.type.push_back(type);
@@ -160,14 +167,15 @@ void FileTypes::set_ignore_list(const wchar_t *ignore_list)
 
 const wchar_t *FileTypes::get_ignore_list(void)
 {
-  wchar_t tmpstr[11] = {0};
-
+  wchar_t tmpstr[11]/* = {0}*/;
+  int tmpstrlen = 0;
   xstrlist.clear();
 
   for (int i=0;i<get_size();i++)
     if (work.ignore[i])
       {
-		xstrlist.append(I2WStr(i, tmpstr, ARRAYSIZE(tmpstr)));
+        I2WStrLen(i, tmpstr, ARRAYSIZE(tmpstr), &tmpstrlen);
+		xstrlist.append(tmpstr, tmpstrlen);
 	    xstrlist.append(L";");
       }
 

@@ -116,16 +116,17 @@ int wa2_Init(void)
   // TODO localise
   wchar_t description[256]/* = { 0 }*/;
   // "AdPlug v" ADPLUG_VERSION "/v" PLUGIN_VERSION
-  PrintfCch(description, ARRAYSIZE(description), L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
-  plugin.description = (char*)SafeWideDup(description);
+  const size_t description_len = PrintfCch(description, ARRAYSIZE(description),
+                                 L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
+  plugin.description = (char*)SafeWideDupN(description, description_len);
 
-  preferences = (prefsDlgRecW*)GlobalAlloc(GPTR, sizeof(prefsDlgRecW));
+  preferences = (prefsDlgRecW*)SafeMalloc(sizeof(prefsDlgRecW));
   if (preferences)
   {
       // TODO localise
       preferences->hInst = GetModuleHandle(GetPaths()->wacup_core_dll);
       preferences->dlgID = IDD_TABBED_PREFS_DIALOG;
-      preferences->name = /*LngStringDup(IDS_VGM)*/SafeWideDup(L"ADLIB | ADPLUG");
+      preferences->name = /*LngStringDup(IDS_VGM)*/SafeWideDupN(L"ADLIB | ADPLUG", 14);
       preferences->proc = ConfigDialogProc;
       preferences->where = 10;
       preferences->_id = 100;
@@ -499,6 +500,8 @@ void __cdecl GetFileExtensions(void)
         loaded_extensions = true;
 
         EnterCriticalSection(&g_ft_cs);
+
+        filetypes.reserve(42);  // give it a nudge on allocations
 
         // TODO localise
         filetypes.add(L"a2m", L"Adlib Tracker 2 Modules (*.A2M)");
