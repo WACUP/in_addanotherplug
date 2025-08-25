@@ -464,14 +464,12 @@ bool MyPlayer::thread_init()
     case emuks:
     case emuwo:
     case emunk:
-      thread.emuts = StartThread(callback_emuts, this, static_cast<int>(plugin.config->
-                                            GetInt(playbackConfigGroupGUID, L"priority",
-                                                    THREAD_PRIORITY_HIGHEST)), 0, NULL);
+      thread.emuts = StartPlaybackThread(callback_emuts, this, 0, NULL);
       if (!thread.emuts)
 	    return false;
       break;
     case disk:
-      thread.disk = StartThread(callback_disk, this, THREAD_PRIORITY_HIGHEST, 0, NULL);
+      thread.disk = StartPlaybackThread(callback_disk, this, 0, NULL);
       if (!thread.disk)
 	    return false;
       break;
