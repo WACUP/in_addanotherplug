@@ -423,7 +423,7 @@ bool MyPlayer::output_init()
 	return false;
       plugin.outMod->SetVolume(-666);
       plugin.SAVSAInit(maxlatency,work.replayfreq);
-      plugin.VSASetInfo((work.stereo ? 2 : 1),work.replayfreq);
+      plugin.VSASetInfo(work.replayfreq,(work.stereo ? 2 : 1));
       break;
     case disk:
       // no init necessary
