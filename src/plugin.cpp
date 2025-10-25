@@ -120,19 +120,9 @@ int wa2_Init(void)
                                  L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
   plugin.description = (char*)SafeWideDupN(description, description_len);
 
-  preferences = (prefsDlgRecW*)SafeMalloc(sizeof(prefsDlgRecW));
-  if (preferences)
-  {
       // TODO localise
-      preferences->hInst = GetModuleHandle(GetPaths()->wacup_core_dll);
-      preferences->dlgID = IDD_TABBED_PREFS_DIALOG;
-      preferences->name = /*LngStringDup(IDS_VGM)*/SafeWideDupN(L"ADLIB | ADPLUG", 14);
-      preferences->proc = ConfigDialogProc;
-      preferences->where = 10;
-      preferences->_id = 100;
-      preferences->next = (_prefsDlgRec*)0xACE;
-      AddPrefsPage((WPARAM)preferences, TRUE);
-  }
+  InputAddPrefsPage(&preferences, GetModuleHandleW(GetPaths()->wacup_core_dll), IDD_TABBED_PREFS_DIALOG,
+                                            ConfigDialogProc, SafeWideDupN(L"ADLIB | ADPLUG", 14), 100);
 
 #ifdef DEBUG
   debug_init();
