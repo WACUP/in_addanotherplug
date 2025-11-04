@@ -220,7 +220,7 @@ void wa2_GetFileInfo(const in_char *file, in_char *title, int *length_in_ms)
   }
 
   if (length_in_ms)
-    *length_in_ms = 0;
+    *length_in_ms = -1000;
 
   // try to get real info
   if ((title || length_in_ms) && get_metadata_info(my_file, false))

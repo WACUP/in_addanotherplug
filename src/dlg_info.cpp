@@ -142,7 +142,7 @@ BOOL APIENTRY GuiDlgInfo::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, LPA
 	  bufxstr += bufstr + fileinfo_player->getinstrument(i);
 
 	  if (i < fileinfo_player->getinstruments() - 1)
-	    bufxstr += std::string("\r\n", 2);
+	    bufxstr.append("\r\n", 2);
 	}
       SetDlgItemTextA(hwndDlg,IDC_INSTLIST,bufxstr.c_str());
 
