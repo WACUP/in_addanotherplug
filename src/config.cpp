@@ -233,12 +233,12 @@ void Config::apply(bool testout)
   work.stereo		= next.stereo;
   work.testloop		= next.testloop;
   work.subseq		= next.subseq;
+  work.usedb		= next.usedb;
+  work.lastprefstab = next.lastprefstab;
   work.stdtimer		= next.stdtimer;
   work.diskdir		= next.diskdir;
   work.ignored		= next.ignored;
   work.db_file		= next.db_file;
-  work.usedb		= next.usedb;
-  work.lastprefstab = next.lastprefstab;
 
   if (!testout || (next.useoutputplug <= useoutputplug))
     {

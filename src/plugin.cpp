@@ -381,8 +381,6 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     return false;
   }
 
-  read_config();
-
   const AutoCharFn fn(file);
   const char *my_file;
 
@@ -399,6 +397,8 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   }
 
   if (!get_metadata_info(my_file, SameStrA(metadata, "reset"))) return false;
+
+  read_config();
 
   bool result = false;
 

@@ -503,7 +503,7 @@ BOOL APIENTRY GuiDlgConfig::FormatsTabDlgProc(HWND hwndDlg, UINT message, WPARAM
         break;
 	  }
   }
-
+  DialogLayout(hwndDlg, message, lParam, /*MODE_ADLIB_FMT_PREFS/*/38/**/);
   return FALSE;
 }
 

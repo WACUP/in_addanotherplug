@@ -42,12 +42,12 @@ struct t_config_data {
   enum t_output  useoutput_alt;
   bool           testloop;
   bool           subseq;
+  bool           usedb;
+  bool           lastprefstab;
   int            stdtimer;
   wstring        diskdir;
   wstring        ignored;
   wstring        db_file;
-  bool           usedb;
-  bool           lastprefstab;
 };
 
 class Config

@@ -30,6 +30,9 @@
 #define IDR_ABOUT_TEXT_GZ               108
 #define IDR_TEXT_HISTORY                116
 #define IDR_TEXT_LICENSE                117
+#define IDC_FORMATLIST                  823
+#define IDC_FTSELALL                    824
+#define IDC_FTDESELALL                  825
 #define IDC_FREQ1                       1001
 #define IDC_FREQ2                       1002
 #define IDC_FREQ3                       1003
@@ -49,9 +52,6 @@
 #define IDC_ALTSYNTH                    1017
 #define IDC_TESTLOOP                    1020
 #define IDC_FASTSEEK                    1021
-#define IDC_FORMATLIST                  1023
-#define IDC_FTSELALL                    1024
-#define IDC_FTDESELALL                  1025
 #define IDC_STDTIMER                    1026
 #define IDC_USEDB                       1027
 #define IDC_DIRECTORY                   1028
