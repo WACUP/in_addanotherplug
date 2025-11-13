@@ -122,7 +122,7 @@ int wa2_Init(void)
 
       // TODO localise
   InputAddPrefsPage(&preferences, GetModuleHandleW(GetPaths()->wacup_core_dll), IDD_TABBED_PREFS_DIALOG,
-                                            ConfigDialogProc, SafeWideDupN(L"ADLIB | ADPLUG", 14), 100);
+                                      ConfigDialogProc, SafeWideDupN(L"ADLIB | ADPLUG", 14), 100, TRUE);
 
 #ifdef DEBUG
   debug_init();
@@ -491,56 +491,56 @@ void __cdecl GetFileExtensions(void)
 
         EnterCriticalSection(&g_ft_cs);
 
-        filetypes.reserve(42);  // give it a nudge on allocations
+        filetypes.reserve(41);  // give it a nudge on allocations
 
         // TODO localise
-        filetypes.add(L"a2m", L"Adlib Tracker 2 Modules (*.A2M)");
-        filetypes.add(L"adl", L"Coktel Vision ADL Files (*.ADL)");
-        //filetypes.add(L"adl", L"Westwood ADL Files (*.ADL)");
-        filetypes.add(L"amd", L"AMUSIC Modules (*.AMD)");
-        filetypes.add(L"bam", L"Bob's Adlib Music Files (*.BAM)");
-        filetypes.add(L"bmf", L"Easy AdLib 1.0 by The Brain (*.BMF)");
-        filetypes.add(L"cff", L"BoomTracker 4 Modules (*.CFF)");
-        filetypes.add(L"cmf", L"Creative Adlib Music Files (*.CMF)");
-        //filetypes.add(L"cmf", L"SoundFX Macs Opera (*.CMF)");
-        filetypes.add(L"d00", L"Packed EdLib Modules (*.D00)");
-        filetypes.add(L"dfm", L"Digital-FM Modules (*.DFM)");
-        filetypes.add(L"dmo", L"TwinTeam Modules (*.DMO)");
-        //filetypes.add(L"dro", L"DOSBox Raw OPL v1.0 and v2.0 Files (*.DRO)");
-        filetypes.add(L"dtm", L"DeFy Adlib Tracker Modules (*.DTM)");
-        filetypes.add(L"got", L"God of Thunder Music (*.GOT)");
-        filetypes.add(L"hsc", L"HSC-Tracker Modules (*.HSC)");
-        filetypes.add(L"hsp", L"Packed HSC-Tracker Modules (*.HSP)");
-        filetypes.add(L"hsq;sqx;sdb;agd;ha2", L"HERAD System (*.HSQ;*.SQX;*.SDB;*.AGD;*.HA2)");
-        filetypes.add(L"imf;wlf;adlib", L"Apogee IMF Files (*.IMF;*.WLF;*.ADLIB)");
-        filetypes.add(L"ims", L"IMPlay Song Files (*.IMS)");
-        filetypes.add(L"jbm", L"JBM Adlib Music Files (*.JBM)");
-        filetypes.add(L"ksm", L"Ken Silverman's Music Files (*.KSM)");
-        filetypes.add(L"laa", L"LucasArts Adlib Audio Files (*.LAA)");
-        filetypes.add(L"lds", L"LOUDNESS Sound System Files (*.LDS)");
-        filetypes.add(L"m", L"Ultima 6 Music Files (*.M)");
-        filetypes.add(L"mad", L"Mlat Adlib Tracker Modules (*.MAD)");
-        filetypes.add(L"mdi", L"AdLib MIDIPlay Files (*.MDI)");
-        filetypes.add(L"mid;kar", L"MIDI Audio Files (*.MID;*.KAR)");
-        filetypes.add(L"mkj", L"MKJamz Audio Files (*.MKJ)");
-        filetypes.add(L"msc", L"AdLib MSCplay (*.MSC)");
-        filetypes.add(L"mtk", L"MPU-401 Trakker Modules (*.MTK)");
-        filetypes.add(L"mus;mdy", L"AdLib MIDI Music Files (*.MUS;*.MDY)");
-        filetypes.add(L"rad", L"Reality Adlib Tracker Modules (*.RAD)");
-        filetypes.add(L"rac;raw", L"Raw AdLib Capture Files (*.RAC;*.RAW)");
-        filetypes.add(L"rix", L"Softstar RIX OPL Music Files (*.RIX)");
-        filetypes.add(L"rol", L"Adlib Visual Composer Modules (*.ROL)");
-        filetypes.add(L"sa2", L"Surprise! Adlib Tracker 2 Modules (*.SA2)");
-        filetypes.add(L"sat", L"Surprise! Adlib Tracker Modules (*.SAT)");
-        filetypes.add(L"sci", L"Sierra Adlib Audio Files (*.SCI)");
-        filetypes.add(L"sng", L"Adlib Tracker 1.0 Modules (*.SNG)");
-        /*filetypes.add(L"sng", L"Faust Music Creator Modules (*.SNG)");
-        filetypes.add(L"sng", L"SNGPlay Files (*.SNG)");*/
-        filetypes.add(L"sop", L"Note Sequencer by sopepos (*.SOP)");
-        //filetypes.add(L"vgm", L"Video Game Music (*.VGM)");
-        filetypes.add(L"xad", L"eXotic Adlib Files (*.XAD)");
-        filetypes.add(L"xms", L"XMS-Tracker Modules (*.XMS)");
-        filetypes.add(L"xsm", L"eXtra Simple Music Files (*.XSM)");
+        filetypes.add(L"a2m", 3, L"Adlib Tracker 2 Modules (*.A2M)", 31);
+        filetypes.add(L"adl", 3, L"Coktel Vision ADL Files (*.ADL)", 31);
+        //filetypes.add(L"adl", 3, L"Westwood ADL Files (*.ADL)", 26);
+        filetypes.add(L"amd", 3, L"AMUSIC Modules (*.AMD)", 22);
+        filetypes.add(L"bam", 3, L"Bob's Adlib Music Files (*.BAM)", 31);
+        filetypes.add(L"bmf", 3, L"Easy AdLib 1.0 by The Brain (*.BMF)", 35);
+        filetypes.add(L"cff", 3, L"BoomTracker 4 Modules (*.CFF)", 29);
+        filetypes.add(L"cmf", 3, L"Creative Adlib Music Files (*.CMF)", 34);
+        //filetypes.add(L"cmf", 3, L"SoundFX Macs Opera (*.CMF)", 26);
+        filetypes.add(L"d00", 3, L"Packed EdLib Modules (*.D00)", 28);
+        filetypes.add(L"dfm", 3, L"Digital-FM Modules (*.DFM)", 26);
+        filetypes.add(L"dmo", 3, L"TwinTeam Modules (*.DMO)", 24);
+        //filetypes.add(L"dro", 3, L"DOSBox Raw OPL v1.0 and v2.0 Files (*.DRO)", 42);
+        filetypes.add(L"dtm", 3, L"DeFy Adlib Tracker Modules (*.DTM)", 34);
+        filetypes.add(L"got", 3, L"God of Thunder Music (*.GOT)", 28);
+        filetypes.add(L"hsc", 3, L"HSC-Tracker Modules (*.HSC)", 27);
+        filetypes.add(L"hsp", 3, L"Packed HSC-Tracker Modules (*.HSP)", 34);
+        filetypes.add(L"hsq;sqx;sdb;agd;ha2", 19, L"HERAD System (*.HSQ;*.SQX;*.SDB;*.AGD;*.HA2)", 44);
+        filetypes.add(L"imf;wlf;adlib", 13, L"Apogee IMF Files (*.IMF;*.WLF;*.ADLIB)", 38);
+        filetypes.add(L"ims", 3, L"IMPlay Song Files (*.IMS)", 25);
+        filetypes.add(L"jbm", 3, L"JBM Adlib Music Files (*.JBM)", 29);
+        filetypes.add(L"ksm", 3, L"Ken Silverman's Music Files (*.KSM)", 35);
+        filetypes.add(L"laa", 3, L"LucasArts Adlib Audio Files (*.LAA)", 35);
+        filetypes.add(L"lds", 3, L"LOUDNESS Sound System Files (*.LDS)", 35);
+        filetypes.add(L"m", 1, L"Ultima 6 Music Files (*.M)", 26);
+        filetypes.add(L"mad", 3, L"Mlat Adlib Tracker Modules (*.MAD)", 34);
+        filetypes.add(L"mdi", 3, L"AdLib MIDIPlay Files (*.MDI)", 28);
+        filetypes.add(L"mid;kar", 7, L"MIDI Audio Files (*.MID;*.KAR)", 30);
+        filetypes.add(L"mkj", 3, L"MKJamz Audio Files (*.MKJ)", 26);
+        filetypes.add(L"msc", 3, L"AdLib MSCplay (*.MSC)", 21); // not safe to register as a file association
+        filetypes.add(L"mtk", 3, L"MPU-401 Trakker Modules (*.MTK)", 31);
+        filetypes.add(L"mus;mdy", 7, L"AdLib MIDI Music Files (*.MUS;*.MDY)", 36);
+        filetypes.add(L"rad", 3, L"Reality Adlib Tracker Modules (*.RAD)", 37);
+        filetypes.add(L"rac;raw", 7, L"Raw AdLib Capture Files (*.RAC;*.RAW)", 37);
+        filetypes.add(L"rix", 3, L"Softstar RIX OPL Music Files (*.RIX)", 36);
+        filetypes.add(L"rol", 3, L"Adlib Visual Composer Modules (*.ROL)", 37);
+        filetypes.add(L"sa2", 3, L"Surprise! Adlib Tracker 2 Modules (*.SA2)", 41);
+        filetypes.add(L"sat", 3, L"Surprise! Adlib Tracker Modules (*.SAT)", 39);
+        filetypes.add(L"sci", 3, L"Sierra Adlib Audio Files (*.SCI)", 32);
+        filetypes.add(L"sng", 3, L"Adlib Tracker 1.0 Modules (*.SNG)", 33);
+        /*filetypes.add(L"sng", 3, L"Faust Music Creator Modules (*.SNG)", 35);
+        filetypes.add(L"sng", 3, L"SNGPlay Files (*.SNG)", 21);*/
+        filetypes.add(L"sop", 3, L"Note Sequencer by sopepos (*.SOP)", 33);
+        //filetypes.add(L"vgm", 3, L"Video Game Music (*.VGM)", 24);
+        filetypes.add(L"xad", 3, L"eXotic Adlib Files (*.XAD)", 26);
+        filetypes.add(L"xms", 3, L"XMS-Tracker Modules (*.XMS)", 27);
+        filetypes.add(L"xsm", 3, L"eXtra Simple Music Files (*.XSM)", 32);
 
         SetFileExtensions(config.get_ignored());
 

@@ -23,7 +23,8 @@ class FileTypes
 
   void      reserve(const size_t count);
 
-  void		add(const wchar_t *type, const wchar_t *name, bool _ignore = false);
+  void		add(const wchar_t* type, const size_t type_len, const wchar_t* name,
+                                     const size_t name_len, bool _ignore = false);
 
   wchar_t *	export_filetypes(wchar_t *buf);
 

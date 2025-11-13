@@ -28,10 +28,10 @@ void FileTypes::reserve(const size_t count)
   work.ignore.reserve(count);
 }
 
-void FileTypes::add(const wchar_t *type, const wchar_t *name, bool _ignore)
+void FileTypes::add(const wchar_t *type, const size_t type_len, const wchar_t *name, const size_t name_len, bool _ignore)
 {
-  work.type.push_back(type);
-  work.name.push_back(name);
+  work.type.emplace_back(type, type_len);
+  work.name.emplace_back(name, name_len);
   work.ignore.push_back(_ignore);
 }
 
