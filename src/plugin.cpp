@@ -75,7 +75,9 @@ t_config_data read_config(void)
     config.load();
     config.get(&cfg);
 
+#if 0   // dro change
     plugin.UsesOutputPlug = config.useoutputplug;
+#endif
   }
   return cfg;
 }
@@ -548,9 +550,14 @@ void __cdecl GetFileExtensions(void)
     }
 }
 
+#define OUR_INPUT_PLUG_IN_FEATURES INPUT_HAS_READ_META | /*INPUT_USES_UNIFIED_ALT3 |*/ \
+                                   INPUT_HAS_FORMAT_CONVERSION_UNICODE/* | \
+                                   INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE*/
+
 In_Module plugin =
   {
     IN_VER_WACUP,
+    IN_INIT_PRE_FEATURES
     //(char*)PLUGIN_VER,
     (char*)"wacup(in_addanotherplug.dll)",
     0,	// hMainWindow
@@ -581,9 +588,7 @@ In_Module plugin =
     NULL,	// setinfo
     0,		// out_mod,
     NULL,	// api_service
-    INPUT_HAS_READ_META | //INPUT_USES_UNIFIED_ALT3 |
-    INPUT_HAS_FORMAT_CONVERSION_UNICODE/* |
-    INPUT_HAS_FORMAT_CONVERSION_SET_TIME_MODE*/,
+    IN_INIT_POST_FEATURES
     GetFileExtensions,	// loading optimisation
     IN_INIT_WACUP_END_STRUCT
   };

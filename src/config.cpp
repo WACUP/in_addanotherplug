@@ -54,7 +54,9 @@ CAdPlugDatabase *Config::mydb = 0;
 
 Config::Config(void)
 {
+#if 0   // dro change
   useoutputplug = true;
+#endif
 }
 
 void Config::load(void)
@@ -210,6 +212,7 @@ void Config::check()
       }
 #endif
 
+#if 0   // dro change
   if (next.useoutput == disk)
     if (!next.stdtimer)
       if (!next.testloop)
@@ -217,6 +220,7 @@ void Config::check()
 
   if (next.useoutputplug > useoutputplug)
     TimedMessageBox(plugin.hMainWindow,MSGA_WINAMP,TEXT("AdPlug :: Attention"),MB_ICONINFORMATION | MB_TASKMODAL, 5000);
+#endif
 
   use_database();/*/
   if (!use_database())
@@ -240,11 +244,17 @@ void Config::apply(bool testout)
   work.ignored		= next.ignored;
   work.db_file		= next.db_file;
 
+#if 0   // dro change
   if (!testout || (next.useoutputplug <= useoutputplug))
+#else
+  if (!testout/* || (next.useoutputplug <= useoutputplug)*/)
+#endif
     {
       work.useoutput = next.useoutput;
       work.useoutput_alt = next.useoutput_alt;
+#if 0   // dro change
       useoutputplug  = next.useoutputplug;
+#endif
     }
 }
 

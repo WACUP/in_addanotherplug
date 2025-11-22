@@ -64,9 +64,9 @@ class Config
 
   const wchar_t *	get_ignored(void);
   void		set_ignored(const wchar_t *ignore_list);
-
+#if 0   // dro change
   bool		useoutputplug;
-
+#endif
  private:
 
   void		apply(bool testout);
