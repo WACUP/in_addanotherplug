@@ -404,7 +404,14 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
 
   bool result = false;
 
-  if (SameStrA(metadata, "title"))
+  const bool length_seconds = SameStrA(metadata, "length_seconds");
+  if (length_seconds || SameStrA(metadata, "length"))
+  {
+    unsigned long length = metadata_info->songlength((file ? my_player.get_subsong() : DFL_SUBSONG));
+    I2WStr((!length_seconds ? length : (length / 1000)), ret, retlen);
+    result = true;
+  }
+  else if (SameStrA(metadata, "title"))
   {
     const auto& title = metadata_info->gettitle();
     result = !title.empty() && ((int)title.length() < retlen);
@@ -439,11 +446,6 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     {
       ConvertANSI(type.c_str(), type.size(), CP_ACP, ret, retlen, NULL);
     }
-  }
-  else if (SameStrA(metadata, "length"))
-  {
-    I2WStr(metadata_info->songlength((file ? my_player.get_subsong() : DFL_SUBSONG)), ret, retlen);
-    result = true;
   }
   else if (SameStrA(metadata, "bitrate"))
   {

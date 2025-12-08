@@ -384,13 +384,14 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
 	      wchar_t shd[_MAX_PATH]/* = { 0 }*/;
           shd[0] = 0;
 
-          BROWSEINFO bi = { 0 };
+          BROWSEINFO bi/* = { 0 }*/;
 	      bi.hwndOwner = hwndDlg;
 	      bi.pszDisplayName = shd;
 	      bi.lpszTitle = TEXT("Select output path for Disk Writer:");
 	      bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_USENEWUI;
           bi.lpfn = BrowseCallbackProc;
           bi.lParam = (LONG_PTR)next.diskdir.c_str();
+          bi.iImage = 0;
 
           LPITEMIDLIST pidl = BrowseForFolder(&bi);
 	      if (pidl)
