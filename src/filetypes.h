@@ -23,8 +23,8 @@ class FileTypes
 
   void      reserve(const size_t count);
 
-  void		add(const wchar_t* type, const size_t type_len, const wchar_t* name,
-                                     const size_t name_len, bool _ignore = false);
+  void		add(const wchar_t* type, const short int type_len, const wchar_t* name,
+                                   const short int name_len, bool _ignore = false);
 
   wchar_t *	export_filetypes(wchar_t *buf);
 
@@ -44,9 +44,11 @@ class FileTypes
 
   struct t_filetype_data
   {
-    vector<wstring>	type;
-    vector<wstring>	name;
-    vector<bool>	ignore;
+    vector<const wchar_t*>  type;
+    vector<short int>       type_len;
+    vector<const wchar_t*>  name;
+    vector<short int>       name_len;
+    vector<bool>            ignore;
   } work;
 
   wstring	xstrlist;

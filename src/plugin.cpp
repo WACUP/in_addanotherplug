@@ -122,7 +122,7 @@ int wa2_Init(void)
                                  L"AdPlug (AdLib) Player v%hs", PLUGIN_VERSION);
   plugin.description = (char*)SafeWideDupN(description, description_len);
 
-      // TODO localise
+  // TODO localise
   InputAddPrefsPage(&preferences, GetModuleHandleW(GetPaths()->wacup_core_dll), IDD_TABBED_PREFS_DIALOG,
                                       ConfigDialogProc, SafeWideDupN(L"ADLIB | ADPLUG", 14), 100, TRUE);
 
@@ -351,7 +351,7 @@ extern "C" __declspec(dllexport) HWND winampAddUnifiedFileInfoPane(int n, const 
 
 extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *file, char * metadata, wchar_t *ret, const size_t retlen)
 {
-  if (ret == NULL || !retlen) return false;
+  if (ret == NULL || !retlen) return 0;
 
   if (SameStrA(metadata, "type") ||
       SameStrA(metadata, "lossless") ||
@@ -359,7 +359,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   {
     ret[0] = L'0';
     ret[1] = L'\0';
-    return true;
+    return 1;
   }
   else if (SameStrNA(metadata, "stream", 6) &&
            (SameStrA((metadata + 6), "type") ||
@@ -368,19 +368,15 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
             SameStrA((metadata + 6), "name") ||
 			SameStrA((metadata + 6), "title")))
   {
-    return false;
+    return 0;
   }
   else if (SameStrA(metadata, "family"))
   {
     read_config();
 
     const int index = filetypes.grata(file);
-    if (index != -1)
-    {
-      wcsncpy(ret, filetypes.get_name(index), retlen);
-      return true;
-    }
-    return false;
+    return ((index != -1) ? (int)CopyCchStrEx(ret, retlen,
+                          filetypes.get_name(index)) : 0);
   }
 
   const AutoCharFn fn(file);
@@ -398,53 +394,60 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     my_file = fn;
   }
 
-  if (!get_metadata_info(my_file, SameStrA(metadata, "reset"))) return false;
+  if (!get_metadata_info(my_file, SameStrA(metadata, "reset"))) return 0;
 
   read_config();
 
-  bool result = false;
+  int result = 0;
 
   const bool length_seconds = SameStrA(metadata, "length_seconds");
   if (length_seconds || SameStrA(metadata, "length"))
   {
     unsigned long length = metadata_info->songlength((file ? my_player.get_subsong() : DFL_SUBSONG));
-    I2WStr((!length_seconds ? length : (length / 1000)), ret, retlen);
-    result = true;
+    I2WStrLen((!length_seconds ? length : (length / 1000)), ret, retlen, &result);
   }
   else if (SameStrA(metadata, "title"))
   {
     const auto& title = metadata_info->gettitle();
     result = !title.empty() && ((int)title.length() < retlen);
-    if (result)
+    if (result > 0)
     {
-      ConvertANSI(title.c_str(), title.size(), CP_ACP, ret, retlen, NULL);
+      size_t copied = 0;
+      ConvertANSI(title.c_str(), title.size(), CP_ACP, ret, retlen, &copied);
+      result = copied;
     }
   }
   else if (SameStrA(metadata, "artist"))
   {
     const auto& author = metadata_info->getauthor();
     result = !author.empty() && ((int)author.length() < retlen);
-    if (result)
+    if (result > 0)
     {
-      ConvertANSI(author.c_str(), author.size(), CP_ACP, ret, retlen, NULL);
+      size_t copied = 0;
+      ConvertANSI(author.c_str(), author.size(), CP_ACP, ret, retlen, &copied);
+      result = copied;
     }
   }
   else if (SameStrA(metadata, "comment"))
   {
     const auto& desc = metadata_info->getdesc();
     result = !desc.empty() && ((int)desc.length() < retlen);
-    if (result)
+    if (result > 0)
     {
-      ConvertANSI(desc.c_str(), desc.size(), CP_ACP, ret, retlen, NULL);
+      size_t copied = 0;
+      ConvertANSI(desc.c_str(), desc.size(), CP_ACP, ret, retlen, &copied);
+      result = copied;
     }
   }
   else if (SameStrA(metadata, "formatinformation"))
   {
     const auto& type = metadata_info->gettype();
     result = !type.empty() && ((int)type.length() < retlen);
-    if (result)
+    if (result > 0)
     {
-      ConvertANSI(type.c_str(), type.size(), CP_ACP, ret, retlen, NULL);
+      size_t copied = 0;
+      ConvertANSI(type.c_str(), type.size(), CP_ACP, ret, retlen, &copied);
+      result = copied;
     }
   }
   else if (SameStrA(metadata, "bitrate"))
@@ -454,12 +457,11 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     ret[1] = L'2';
     ret[2] = L'0';
     ret[3] = L'\0';
-    result = true;
+    result = 3;
   }
   else if (SameStrA(metadata, "samplerate"))
   {
-    I2WStr(read_config().replayfreq, ret, retlen);
-    result = true;
+    I2WStrLen(read_config().replayfreq, ret, retlen, &result);
   }
   else if (SameStrA(metadata, "bitdepth"))
   {
@@ -467,7 +469,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
     ret[0] = L'-';
     ret[1] = L'1';
     ret[2] = 0;
-    result = true;
+    result = 2;
   }
 
   return result;

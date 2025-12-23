@@ -24,14 +24,18 @@
 void FileTypes::reserve(const size_t count)
 {
   work.type.reserve(count);
+  work.type_len.reserve(count);
   work.name.reserve(count);
+  work.name_len.reserve(count);
   work.ignore.reserve(count);
 }
 
-void FileTypes::add(const wchar_t *type, const size_t type_len, const wchar_t *name, const size_t name_len, bool _ignore)
+void FileTypes::add(const wchar_t *type, const short int type_len, const wchar_t *name, const short int name_len, bool _ignore)
 {
-  work.type.emplace_back(type, type_len);
-  work.name.emplace_back(name, name_len);
+  work.type.push_back(type);
+  work.type_len.push_back(type_len);
+  work.name.push_back(name);
+  work.name_len.push_back(name_len);
   work.ignore.push_back(_ignore);
 }
 
@@ -41,12 +45,14 @@ wchar_t *FileTypes::export_filetypes(wchar_t *buf)
   const int count = get_size();
   for (int i=0;i<count;i++)
     if(!work.ignore[i]) {
-      memcpy(buf, work.type[i].c_str(),work.type[i].length()*2);
-      buf += work.type[i].length();
+      int length = work.type_len[i];
+      memcpy(buf, work.type[i],length*2);
+      buf += length;
       *buf++ = 0;
 
-      memcpy(buf,work.name[i].c_str(),work.name[i].length()*2);
-      buf += work.name[i].length();
+      length = work.name_len[i];
+      memcpy(buf,work.name[i],length*2);
+      buf += length;
       *buf++ = 0;
     }
 
@@ -55,14 +61,14 @@ wchar_t *FileTypes::export_filetypes(wchar_t *buf)
   return retval;
 }
 
-int FileTypes::get_size() const
+__declspec(noinline) int FileTypes::get_size() const
 {
   return work.type.size();
 }
 
 const wchar_t *FileTypes::get_name(int i)
 {
-  return work.name[i].c_str();
+  return work.name[i];
 }
 
 bool FileTypes::get_ignore(int i) const
@@ -93,9 +99,7 @@ int FileTypes::grata(const wchar_t *fname) const
     if (work.ignore[i])
 	  continue;
 
-    wstring tmpxstr = work.type[i];
-
-    const wchar_t *ext = tmpxstr.c_str();
+    const wchar_t *ext = work.type[i];
 
 	// if we know there's no additional
 	// extensions then we just match it
