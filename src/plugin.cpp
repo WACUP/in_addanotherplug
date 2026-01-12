@@ -379,22 +379,35 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
                           filetypes.get_name(index)) : 0);
   }
 
-  const AutoCharFn fn(file);
+  const bool reset = SameStrA(metadata, "reset");
   const char *my_file;
+  bool free_my_file = false;
 
   // current file ?
   if ((!file) || (!(*file)))
     my_file = my_player.get_file();
-  else
+  else if (!reset)
   {
     // our file ?
     /*if (!wa2_IsOurFile(file))
       return false;*/
 
-    my_file = fn;
+    my_file = AutoCharFnDup(file);
+    free_my_file = true;
+  }
+  else
+  {
+    my_file = NULL;
   }
 
-  if (!get_metadata_info(my_file, SameStrA(metadata, "reset"))) return 0;
+  const bool got = get_metadata_info(my_file, reset);
+
+  if (free_my_file)
+  {
+    SafeFree((void*)my_file);
+  }
+
+  if (!got) return 0;
 
   read_config();
 
