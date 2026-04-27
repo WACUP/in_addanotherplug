@@ -21,7 +21,7 @@
 #include "api.h"
 #define WA_UTILS_SIMPLE
 #include <../../loader/loader/utils.h>
-#include <../../sdk/nu/autocharfn.h>
+#include <../../sdk/nu/AutoCharFn.h>
 
 extern In_Module plugin;
 extern Config config;

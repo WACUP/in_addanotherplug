@@ -21,8 +21,8 @@
 #include <../../loader/loader/paths.h>
 #define WA_UTILS_SIMPLE
 #include <../../loader/loader/utils.h>
-#include <../../sdk/nu/autochar.h>
-#include <../../sdk/nu/autocharfn.h>
+#include <../../sdk/nu/AutoChar.h>
+#include <../../sdk/nu/AutoCharFn.h>
 
 extern In_Module plugin;
 
@@ -222,9 +222,9 @@ void Config::check()
     TimedMessageBox(plugin.hMainWindow,MSGA_WINAMP,TEXT("AdPlug :: Attention"),MB_ICONINFORMATION | MB_TASKMODAL, 5000);
 #endif
 
-  use_database();/*/
+  use_database();/*
   if (!use_database())
-    TimedMessageBox(plugin.hMainWindow,MSGC_DATABASE,TEXT("AdPlug :: Caution"),MB_ICONWARNING | MB_TASKMODAL, 5000);/**/
+    TimedMessageBox(plugin.hMainWindow,MSGC_DATABASE,TEXT("AdPlug :: Caution"),MB_ICONWARNING | MB_TASKMODAL, 5000);*/
 }
 
 void Config::apply(bool testout)

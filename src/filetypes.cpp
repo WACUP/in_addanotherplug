@@ -106,7 +106,7 @@ int FileTypes::grata(const wchar_t *fname) const
 	// directly otherwise 'm' -> 'a2m'
     if (!wcsstr(ext, L";"))
     {
-      if (!wcsicmp(ext, p))
+      if (!_wcsicmp(ext, p))
       {
         free(p);
         return i;

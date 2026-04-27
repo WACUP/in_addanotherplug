@@ -87,7 +87,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
     {
     case WM_INITDIALOG:
     {
-      TCITEM tci = { 0 };
+      TCITEM tci = {};
       DarkModeSetup(hwndDlg);
 
       // enable tooltips
@@ -109,7 +109,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
       // display new tab window
       HWND hTab = GetDlgItem(hwndDlg,IDC_TABBED_PREFS_TAB);
 
-      RECT r = { 0 };
+      RECT r = {};
       GetClientRect(hTab, &r);
       TabCtrl_AdjustRect(hTab, 0, &r);
       for (int i = 0; i < 2; i++)
@@ -158,7 +158,7 @@ BOOL APIENTRY GuiDlgConfig::DlgProc(HWND hwndDlg, UINT message, WPARAM wParam, L
     }
     case (WM_APP + 374):
 	{
-	  RECT r = { 0 };
+	  RECT r = {};
 	  HWND hTab = GetDlgItem(hwndDlg,IDC_TABBED_PREFS_TAB);
 	  GetClientRect(hTab, &r);
 	  TabCtrl_AdjustRect(hTab, 0, &r);
@@ -412,7 +412,7 @@ BOOL APIENTRY GuiDlgConfig::OutputTabDlgProc(HWND hwndDlg, UINT message, WPARAM 
         }
 	    case IDC_DATABASE:
         {
-          OPENFILENAME ofn = { 0 };
+          OPENFILENAME ofn = {};
 
 	      ofn.lStructSize = sizeof(ofn);
 	      ofn.hwndOwner = hwndDlg;

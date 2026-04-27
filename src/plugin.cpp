@@ -25,7 +25,7 @@
 #define WA_UTILS_SIMPLE
 #include <../../loader/loader/utils.h>
 #include <../../loader/loader/runtime_helper.h>
-#include <../../sdk/nu/autocharfn.h>
+#include <../../sdk/nu/AutoCharFn.h>
 
 #ifdef DEBUG
 #	include "debug.h"
@@ -35,7 +35,7 @@ extern In_Module	plugin;
 
 static prefsDlgRecW* preferences;
 
-CRITICAL_SECTION g_ft_cs = { 0 };
+CRITICAL_SECTION g_ft_cs = {};
 Config			config;
 FileTypes		filetypes;
 MyPlayer		my_player;
@@ -124,7 +124,7 @@ int wa2_Init(void)
 
   // TODO localise
   InputAddPrefsPage(&preferences, GetModuleHandleW(GetPaths()->wacup_core_dll), IDD_TABBED_PREFS_DIALOG,
-                                      ConfigDialogProc, SafeWideDupN(L"ADLIB | ADPLUG", 14), 100, TRUE);
+                               (void*)ConfigDialogProc, SafeWideDupN(L"ADLIB | ADPLUG", 14), 100, TRUE);
 
 #ifdef DEBUG
   debug_init();
@@ -162,7 +162,7 @@ void wa2_Quit(void)
   return 0;
 }*/
 
-const bool get_metadata_info(const char *file, const bool reset)
+bool get_metadata_info(const char *file, const bool reset)
 {
   if (reset || !metadata_info || !SameStrA(last_meta_fn.c_str(), file))
   {
@@ -422,7 +422,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   else if (SameStrA(metadata, "title"))
   {
     const auto& title = metadata_info->gettitle();
-    result = !title.empty() && ((int)title.length() < retlen);
+    result = !title.empty() && (title.length() < retlen);
     if (result > 0)
     {
       size_t copied = 0;
@@ -433,7 +433,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   else if (SameStrA(metadata, "artist"))
   {
     const auto& author = metadata_info->getauthor();
-    result = !author.empty() && ((int)author.length() < retlen);
+    result = !author.empty() && (author.length() < retlen);
     if (result > 0)
     {
       size_t copied = 0;
@@ -444,7 +444,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   else if (SameStrA(metadata, "comment"))
   {
     const auto& desc = metadata_info->getdesc();
-    result = !desc.empty() && ((int)desc.length() < retlen);
+    result = !desc.empty() && (desc.length() < retlen);
     if (result > 0)
     {
       size_t copied = 0;
@@ -455,7 +455,7 @@ extern "C" __declspec(dllexport) int winampGetExtendedFileInfoW(const wchar_t *f
   else if (SameStrA(metadata, "formatinformation"))
   {
     const auto& type = metadata_info->gettype();
-    result = !type.empty() && ((int)type.length() < retlen);
+    result = !type.empty() && (type.length() < retlen);
     if (result > 0)
     {
       size_t copied = 0;
@@ -588,7 +588,7 @@ In_Module plugin =
     wa2_Quit,
     wa2_GetFileInfo,
     wa2_DlgInfo,
-    NULL/*/wa2_IsOurFile/**/,
+    NULL,
     wa2_Play,
     wa2_Pause,
     wa2_UnPause,
