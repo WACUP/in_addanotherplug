@@ -6,6 +6,8 @@
  * debug_init() opens a console window and initializes console output.
  */
 
+#ifdef DEBUG
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -34,4 +36,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

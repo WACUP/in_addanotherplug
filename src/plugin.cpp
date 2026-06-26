@@ -312,7 +312,7 @@ void wa2_About(HWND hwndParent)
   // TODO localise
   wchar_t message[2048]/* = { 0 }*/;
   PrintfCch(message, ARRAYSIZE(message), (LPCWSTR)output,
-            (LPCWSTR)plugin.description, L"beta863",
+            (LPCWSTR)plugin.description, L"beta921",
             WACUP_Author(), WACUP_Copyright(), TEXT(__DATE__));
   AboutMessageBox(hwndParent, message, L"AdPlug (AdLib) Player");
   SafeFree((void*)output);
